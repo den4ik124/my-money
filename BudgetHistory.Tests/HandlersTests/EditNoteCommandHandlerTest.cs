@@ -13,9 +13,8 @@ namespace Notebook.Tests.HandlersTests
 {
     public class EditNoteCommandHandlerTest : NotesBaseTest
     {
-        [Theory]
-        [InlineData("")]
-        public async void EditNoteCommandHandler_ShouldUpdate_NoteData(Guid noteId)
+        [Fact]
+        public async void EditNoteCommandHandler_ShouldUpdate_NoteData()
         {
             var genRepoMock = Mocks.MockRepository.GetMockedNoteRepository();
             var items = new List<Note>()
@@ -36,12 +35,13 @@ namespace Notebook.Tests.HandlersTests
 
             genRepoMock.Setup(rep => rep.Update(It.IsAny<Note>())).Returns((Note updatedItem) =>
             {
-                var item = items.FirstOrDefault(i => i.Id == noteId);
+                var item = items.FirstOrDefault();
                 item = updatedItem;
                 return true;
             });
+
             UnitOfWorkMock.Setup(x => x.GetGenericRepository<Note>()).Returns(genRepoMock.Object);
-            var editedNote = (await genRepoMock.Object.GetWhere(x => x.Id == noteId)).FirstOrDefault();
+            var editedNote = genRepoMock.Object.GetQuery().FirstOrDefault();
             var checkString = Guid.NewGuid();
 
             var editedNoteDto = new NoteDto();
@@ -60,7 +60,7 @@ namespace Notebook.Tests.HandlersTests
 
             //Act
             var result = await handler.Handle(request, CancellationToken.None);
-            var changedNote = (await genRepoMock.Object.GetWhere(x => x.Id == noteId)).FirstOrDefault();
+            var changedNote = genRepoMock.Object.GetQuery().FirstOrDefault();
 
             //Assert
             result.IsSuccess.ShouldBeTrue();

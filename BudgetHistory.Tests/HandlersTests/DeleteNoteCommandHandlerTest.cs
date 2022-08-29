@@ -1,7 +1,7 @@
 using Notebook.Application.Notes.Commands;
 using Notebook.Core;
 using Shouldly;
-using System;
+using System.Linq;
 using System.Threading;
 using Xunit;
 
@@ -16,12 +16,14 @@ namespace Notebook.Tests.HandlersTests
             UnitOfWorkMock.Setup(x => x.GetGenericRepository<Note>()).Returns(genRepoMock.Object);
 
             var itemsCountBefore = await genRepoMock.Object.GetItemsCount();
+
+            var deletedNoteId = genRepoMock.Object.GetQuery().First().Id;
             //Arrange
             var handler = new DeleteNoteCommandHandler(UnitOfWorkMock.Object);
 
             var request = new DeleteNoteCommand()
             {
-                NoteId = Guid.NewGuid(),
+                NoteId = deletedNoteId,
             };
 
             //Act
