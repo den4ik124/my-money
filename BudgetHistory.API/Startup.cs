@@ -1,3 +1,5 @@
+using BudgetHistory.Core.Interfaces;
+using BudgetHistory.Core.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -27,6 +29,8 @@ namespace Notebook.API
             services.AddIdentityServices(Configuration);
 
             services.AddAutoMapper(typeof(Startup));
+
+            services.AddSingleton<IEncryptionDecryption, EncryptionDecryptionService>();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
