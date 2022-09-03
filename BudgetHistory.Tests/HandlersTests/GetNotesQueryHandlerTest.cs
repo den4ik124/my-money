@@ -1,12 +1,12 @@
-using Notebook.Application.DTOs.Common;
-using Notebook.Application.Notes.Queries;
-using Notebook.Core;
+using BudgetHistory.Application.DTOs.Common;
+using BudgetHistory.Application.Notes.Queries;
+using BudgetHistory.Core.Models;
 using Shouldly;
 using System.Linq;
 using System.Threading;
 using Xunit;
 
-namespace Notebook.Tests.HandlersTests
+namespace BudgetHistory.Tests.HandlersTests
 {
     public class GetNotesQueryHandlerTest : NotesBaseTest
     {

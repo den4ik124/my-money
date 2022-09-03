@@ -1,8 +1,8 @@
-﻿using MediatR;
-using Notebook.Application.Core;
-using Notebook.Application.DTOs;
+﻿using BudgetHistory.Application.Core;
+using BudgetHistory.Application.DTOs;
+using MediatR;
 
-namespace Notebook.Application.Notes.Commands
+namespace BudgetHistory.Application.Notes.Commands
 {
     public class CreateNoteCommand : IRequest<Result<string>>
     {

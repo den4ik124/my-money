@@ -1,16 +1,16 @@
-﻿using MediatR;
+﻿using BudgetHistory.Application.Core;
+using BudgetHistory.Application.DTOs.Auth;
+using BudgetHistory.Core.AppSettings;
+using BudgetHistory.Core.Services;
+using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
-using Notebook.Application.Core;
-using Notebook.Application.DTOs.Auth;
-using Notebook.Core.AppSettings;
-using Notebook.Core.Services;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Notebook.Application.Auth.Commands
+namespace BudgetHistory.Application.Auth.Commands
 {
     public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<object>>
     {

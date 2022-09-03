@@ -1,7 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Notebook.Core;
+﻿using BudgetHistory.Core.Models;
+using Microsoft.EntityFrameworkCore;
 
-namespace Notebook.Data
+namespace BudgetHistory.Data
 {
     public class NotesDbContext : DbContext
     {
@@ -10,9 +10,12 @@ namespace Notebook.Data
         }
 
         public DbSet<Note> Notes { get; set; }
+        public DbSet<Room> Rooms { get; set; }
+        public DbSet<User> Users { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
+            base.OnModelCreating(builder);
         }
     }
 }

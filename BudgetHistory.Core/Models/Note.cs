@@ -1,10 +1,9 @@
 ﻿using System;
 
-namespace Notebook.Core
+namespace BudgetHistory.Core.Models
 {
-    public class Note : BaseEntity<int>
+    public class Note : BaseEntity<Guid>
     {
-        public Guid Id { get; set; }
         public Guid UserId { get; set; }
         public Guid RoomId { get; set; }
         public decimal Value { get; set; }

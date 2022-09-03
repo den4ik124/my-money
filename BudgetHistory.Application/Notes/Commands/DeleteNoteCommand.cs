@@ -1,8 +1,8 @@
-﻿using MediatR;
-using Notebook.Application.Core;
+﻿using BudgetHistory.Application.Core;
+using MediatR;
 using System;
 
-namespace Notebook.Application.Notes.Commands
+namespace BudgetHistory.Application.Notes.Commands
 {
     public class DeleteNoteCommand : IRequest<Result<string>>
     {

@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
-using Notebook.Application.DTOs;
-using Notebook.Core;
+using BudgetHistory.Application.DTOs;
+using BudgetHistory.Core.Models;
 
-namespace Notebook.API.Mappings
+namespace BudgetHistory.API.Mappings
 {
     public class ModelsMapper : Profile
     {
@@ -11,8 +11,8 @@ namespace Notebook.API.Mappings
             CreateMap<Note, NoteDto>();
             CreateMap<NoteDto, Note>();
 
-            CreateMap<Room, AddressDto>();
-            CreateMap<AddressDto, Room>();
+            CreateMap<Room, RoomDto>();
+            CreateMap<RoomDto, Room>();
         }
     }
 }

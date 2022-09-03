@@ -1,7 +1,7 @@
-﻿using Notebook.Core.Interfaces;
+﻿using BudgetHistory.Core.Interfaces;
 using System;
 
-namespace Notebook.Core
+namespace BudgetHistory.Core.Models
 {
     public class BaseEntity<T> : IEntity<T>
     {

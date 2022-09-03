@@ -1,14 +1,14 @@
 ﻿using AutoMapper;
+using BudgetHistory.Application.Core;
+using BudgetHistory.Application.DTOs;
+using BudgetHistory.Core.Interfaces.Repositories;
+using BudgetHistory.Core.Models;
 using MediatR;
-using Notebook.Application.Core;
-using Notebook.Application.DTOs;
-using Notebook.Core;
-using Notebook.Core.Interfaces.Repositories;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Notebook.Application.Notes.Queries
+namespace BudgetHistory.Application.Notes.Queries
 {
     public class GetNoteByIdQueryHandler : IRequestHandler<GetNoteByIdQuery, Result<NoteDto>>
     {

@@ -1,4 +1,4 @@
-﻿namespace Notebook.Core.Constants
+﻿namespace BudgetHistory.Core.Constants
 {
     public class Headers
     {

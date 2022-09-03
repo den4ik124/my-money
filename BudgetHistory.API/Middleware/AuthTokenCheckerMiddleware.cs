@@ -1,10 +1,10 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using BudgetHistory.Core.Constants;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Notebook.Core.Constants;
 using System;
 using System.Threading.Tasks;
 
-namespace Notebook.API.Middleware
+namespace BudgetHistory.API.Middleware
 {
     public class AuthTokenCheckerMiddleware
     {

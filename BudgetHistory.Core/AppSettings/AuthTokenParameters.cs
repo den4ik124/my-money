@@ -1,4 +1,4 @@
-﻿namespace Notebook.Core.AppSettings
+﻿namespace BudgetHistory.Core.AppSettings
 {
     public class AuthTokenParameters
     {

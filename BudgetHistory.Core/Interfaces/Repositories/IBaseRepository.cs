@@ -1,4 +1,4 @@
-﻿namespace Notebook.Core.Interfaces.Repositories
+﻿namespace BudgetHistory.Core.Interfaces.Repositories
 {
     public interface IBaseRepository
     {

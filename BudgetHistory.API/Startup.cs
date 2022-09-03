@@ -1,17 +1,15 @@
-using BudgetHistory.Core.Interfaces;
-using BudgetHistory.Core.Services;
+using BudgetHistory.API.Extensions;
+using BudgetHistory.API.Middleware;
+using BudgetHistory.Data.Seed.Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-using Notebook.API.Extensions;
-using Notebook.API.Middleware;
-using Notebook.Data.Seed.Interfaces;
 using System;
 
-namespace Notebook.API
+namespace BudgetHistory.API
 {
     public class Startup
     {
@@ -29,8 +27,6 @@ namespace Notebook.API
             services.AddIdentityServices(Configuration);
 
             services.AddAutoMapper(typeof(Startup));
-
-            services.AddSingleton<IEncryptionDecryption, EncryptionDecryptionService>();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>

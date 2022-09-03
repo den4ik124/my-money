@@ -1,11 +1,11 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using BudgetHistory.API.Controllers;
+using BudgetHistory.Application.Auth.Commands;
+using BudgetHistory.Application.DTOs.Auth;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Notebook.API.Controllers;
-using Notebook.Application.Auth.Commands;
-using Notebook.Application.DTOs.Auth;
 using System.Threading.Tasks;
 
-namespace Notebook.Api.Controllers
+namespace BudgetHistory.Api.Controllers
 {
     public class AuthController : BaseApiController
     {

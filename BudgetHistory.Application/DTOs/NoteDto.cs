@@ -1,7 +1,7 @@
-﻿using Notebook.Core;
+﻿using BudgetHistory.Core.Models;
 using System;
 
-namespace Notebook.Application.DTOs
+namespace BudgetHistory.Application.DTOs
 {
     public class NoteDto
     {

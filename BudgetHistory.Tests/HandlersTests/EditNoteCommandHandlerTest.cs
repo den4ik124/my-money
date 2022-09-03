@@ -1,7 +1,7 @@
+using BudgetHistory.Application.DTOs;
+using BudgetHistory.Application.Notes.Commands;
+using BudgetHistory.Core.Models;
 using Moq;
-using Notebook.Application.DTOs;
-using Notebook.Application.Notes.Commands;
-using Notebook.Core;
 using Shouldly;
 using System;
 using System.Collections.Generic;
@@ -9,7 +9,7 @@ using System.Linq;
 using System.Threading;
 using Xunit;
 
-namespace Notebook.Tests.HandlersTests
+namespace BudgetHistory.Tests.HandlersTests
 {
     public class EditNoteCommandHandlerTest : NotesBaseTest
     {

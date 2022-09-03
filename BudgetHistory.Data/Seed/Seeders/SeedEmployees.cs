@@ -1,11 +1,11 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using BudgetHistory.Core.Constants;
+using BudgetHistory.Data.Seed.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Notebook.Core.Constants;
-using Notebook.Data.Seed.Interfaces;
 using System;
 
-namespace Notebook.Data.Seed.Seeders
+namespace BudgetHistory.Data.Seed.Seeders
 {
     public class SeedEmployees : ISeedEmployees
     {

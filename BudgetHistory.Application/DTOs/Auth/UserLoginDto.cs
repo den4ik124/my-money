@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Notebook.Application.DTOs.Auth
+namespace BudgetHistory.Application.DTOs.Auth
 {
     public class UserLoginDto
     {

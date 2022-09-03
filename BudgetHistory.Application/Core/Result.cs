@@ -1,4 +1,4 @@
-﻿namespace Notebook.Application.Core
+﻿namespace BudgetHistory.Application.Core
 {
     public class Result<T>
     {

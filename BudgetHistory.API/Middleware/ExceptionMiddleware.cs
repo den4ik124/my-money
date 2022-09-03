@@ -1,14 +1,14 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using BudgetHistory.Application.Core;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Notebook.Application.Core;
 using System;
 using System.IO;
 using System.Net;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace Notebook.API.Middleware
+namespace BudgetHistory.API.Middleware
 {
     public class ExceptionMiddleware
     {

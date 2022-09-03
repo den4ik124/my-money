@@ -1,11 +1,11 @@
-using Notebook.Application.Notes.Commands;
-using Notebook.Core;
+using BudgetHistory.Application.Notes.Commands;
+using BudgetHistory.Core.Models;
 using Shouldly;
 using System.Linq;
 using System.Threading;
 using Xunit;
 
-namespace Notebook.Tests.HandlersTests
+namespace BudgetHistory.Tests.HandlersTests
 {
     public class DeleteNoteCommandHandlerTest : NotesBaseTest
     {

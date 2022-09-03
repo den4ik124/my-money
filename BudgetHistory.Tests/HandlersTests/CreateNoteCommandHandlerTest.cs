@@ -1,12 +1,12 @@
-using Notebook.Application.DTOs;
-using Notebook.Application.Notes.Commands;
-using Notebook.Core;
+using BudgetHistory.Application.DTOs;
+using BudgetHistory.Application.Notes.Commands;
+using BudgetHistory.Core.Models;
 using Shouldly;
 using System;
 using System.Threading;
 using Xunit;
 
-namespace Notebook.Tests.HandlersTests
+namespace BudgetHistory.Tests.HandlersTests
 {
     public class CreateNoteCommandHandlerTest : NotesBaseTest
     {

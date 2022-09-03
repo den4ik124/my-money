@@ -1,8 +1,8 @@
-﻿using MediatR;
-using Notebook.Application.Core;
-using Notebook.Application.DTOs;
+﻿using BudgetHistory.Application.Core;
+using BudgetHistory.Application.DTOs;
+using MediatR;
 
-namespace Notebook.Application.Notes.Queries
+namespace BudgetHistory.Application.Notes.Queries
 {
     public class GetNotesQuery : QueryBase, IRequest<Result<PagedList<NoteDto>>>
     {

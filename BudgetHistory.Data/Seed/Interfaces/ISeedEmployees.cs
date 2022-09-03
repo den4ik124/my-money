@@ -1,4 +1,4 @@
-﻿namespace Notebook.Data.Seed.Interfaces
+﻿namespace BudgetHistory.Data.Seed.Interfaces
 {
     public interface ISeedEmployees : ISeeder
     {

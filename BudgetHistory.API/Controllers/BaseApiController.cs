@@ -1,9 +1,9 @@
-﻿using MediatR;
+﻿using BudgetHistory.Application.Core;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
-using Notebook.Application.Core;
 
-namespace Notebook.API.Controllers
+namespace BudgetHistory.API.Controllers
 {
     [ApiController]
     [Route("[controller]")]
