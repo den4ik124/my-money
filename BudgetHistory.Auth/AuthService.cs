@@ -1,5 +1,9 @@
-﻿using BudgetHistory.Auth.Interfaces;
+﻿using AutoMapper;
+using BudgetHistory.Auth.Interfaces;
 using BudgetHistory.Core.AppSettings;
+using BudgetHistory.Core.Constants;
+using BudgetHistory.Core.Interfaces.Repositories;
+using BudgetHistory.Core.Models;
 using BudgetHistory.Core.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -15,19 +19,25 @@ namespace BudgetHistory.Auth
         private readonly UserManager<IdentityUser> userManager;
         private readonly SignInManager<IdentityUser> signInManager;
         private readonly ILogger<AuthService> logger;
+        private readonly IMapper mapper;
         private readonly TokenService tokenService;
+        private readonly IUnitOfWork unitOfWork;
         private readonly AuthTokenParameters authTokenParameters;
 
         public AuthService(UserManager<IdentityUser> userManager,
                            SignInManager<IdentityUser> signInManager,
-                           ILogger<AuthService> logger,
                            TokenService tokenService,
-                           IOptions<AuthTokenParameters> authParams)
+                           IUnitOfWork unitOfWork,
+                           IOptions<AuthTokenParameters> authParams,
+                           ILogger<AuthService> logger,
+                           IMapper mapper)
         {
             this.userManager = userManager;
             this.signInManager = signInManager;
             this.logger = logger;
+            this.mapper = mapper;
             this.tokenService = tokenService;
+            this.unitOfWork = unitOfWork;
             this.authTokenParameters = authParams.Value;
         }
 
@@ -56,6 +66,47 @@ namespace BudgetHistory.Auth
                 return new AuthResult() { IsSuccess = true, Message = "Successful login." };
             }
             return new AuthResult() { IsSuccess = false, Message = "Incorrect password." };
+        }
+
+        public async Task<AuthResult> RegisterUser(IdentityUser identityUser, string password)
+        {
+            var errorMessage = string.Empty;
+            var user = mapper.Map<User>(identityUser);
+            var result = await userManager.CreateAsync(identityUser, password);
+            if (!result.Succeeded)
+            {
+                errorMessage = string.Join("|", result.Errors);
+                logger.LogError(errorMessage);
+                return new AuthResult() { IsSuccess = result.Succeeded, Message = errorMessage };
+            }
+
+            var userFromDb = await userManager.FindByNameAsync(identityUser.UserName);
+            if (userFromDb == null)
+            {
+                errorMessage = $"User ({identityUser.UserName}) does not exist yet.";
+                logger.LogError(errorMessage);
+                return new AuthResult() { IsSuccess = false, Message = errorMessage };
+            }
+
+            var addToRoleResult = await userManager.AddToRoleAsync(userFromDb, nameof(Roles.Customer));
+            if (!addToRoleResult.Succeeded)
+            {
+                errorMessage = string.Join('|', addToRoleResult.Errors);
+                logger.LogError(errorMessage);
+                return new AuthResult() { IsSuccess = false, Message = errorMessage };
+            }
+
+            user.AssociatedIdentityUserId = new Guid(userFromDb.Id);
+
+            if (await unitOfWork.GetGenericRepository<User>().Add(user))
+            {
+                await unitOfWork.CompleteAsync();
+                return new AuthResult() { IsSuccess = result.Succeeded, Message = $"\"{identityUser.UserName}\" has been successfully registered." };
+            }
+
+            errorMessage = $"User ({identityUser.UserName}) can't be registered.";
+            logger.LogError(errorMessage);
+            return new AuthResult() { IsSuccess = false, Message = errorMessage };
         }
     }
 }

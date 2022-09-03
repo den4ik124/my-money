@@ -20,5 +20,15 @@ namespace BudgetHistory.Api.Controllers
                 Response = base.Response
             }));
         }
+
+        [AllowAnonymous]
+        [HttpPost("register")]
+        public async Task<IActionResult> Купшыеук(UserRegistrationDto userRegistrationDto)
+        {
+            return HandleResult(await Mediator.Send(new RegisterCommand()
+            {
+                UserRegistrationDto = userRegistrationDto
+            }));
+        }
     }
 }
