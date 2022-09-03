@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading;
 using Xunit;
 
-namespace BudgetHistory.Tests.HandlersTests
+namespace BudgetHistory.Tests.HandlersTests.Notes
 {
     public class DeleteNoteCommandHandlerTest : NotesBaseTest
     {

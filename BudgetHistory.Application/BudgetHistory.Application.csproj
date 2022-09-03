@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\BudgetHistory.Auth\BudgetHistory.Auth.csproj" />
     <ProjectReference Include="..\BudgetHistory.Core\BudgetHistory.Core.csproj" />
   </ItemGroup>
 

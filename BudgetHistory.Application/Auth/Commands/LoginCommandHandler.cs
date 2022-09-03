@@ -1,90 +1,50 @@
-﻿using BudgetHistory.Application.Core;
-using BudgetHistory.Application.DTOs.Auth;
+﻿using AutoMapper;
+using BudgetHistory.Application.Core;
+using BudgetHistory.Auth.Interfaces;
 using BudgetHistory.Core.AppSettings;
 using BudgetHistory.Core.Services;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace BudgetHistory.Application.Auth.Commands
 {
-    public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<object>>
+    public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<string>>
     {
         private readonly UserManager<IdentityUser> userManager;
         private readonly SignInManager<IdentityUser> signInManager;
         private readonly TokenService tokenService;
+        private readonly IAuthService authService;
+        private readonly IMapper mapper;
         private readonly AuthTokenParameters authParams;
 
         public LoginCommandHandler(UserManager<IdentityUser> userManager,
                                    SignInManager<IdentityUser> signInManager,
                                    TokenService tokenService,
-                                   IOptions<AuthTokenParameters> authParams)
+                                   IOptions<AuthTokenParameters> authParams,
+                                   IAuthService authService,
+                                   IMapper mapper)
         {
             this.userManager = userManager;
             this.signInManager = signInManager;
             this.tokenService = tokenService;
+            this.authService = authService;
+            this.mapper = mapper;
             this.authParams = authParams.Value;
         }
 
-        public async Task<Result<object>> Handle(LoginCommand request, CancellationToken cancellationToken)
+        public async Task<Result<string>> Handle(LoginCommand request, CancellationToken cancellationToken)
         {
-            IdentityUser userFromDb = null;
-
             if (string.IsNullOrEmpty(request.UserLoginDto.UserName))
             {
-                return Result<object>.Failure("Username has not been inputted!");
+                return Result<string>.Failure("Username has not been inputted!");
             }
 
-            if (!string.IsNullOrEmpty(request.UserLoginDto.UserName))
-            {
-                userFromDb = await this.userManager.FindByNameAsync(request.UserLoginDto.UserName);
-                if (userFromDb == null)
-                {
-                    return Result<object>.Failure("User has not been found");
-                }
-            }
+            var result = await authService.Authenticate(request.UserLoginDto.UserName, request.UserLoginDto.Password, request.HttpContext);
 
-            var loginResult = await this.signInManager.CheckPasswordSignInAsync(userFromDb,
-                                                                                request.UserLoginDto.Password,
-                                                                                lockoutOnFailure: false);
-            if (loginResult != null && loginResult.Succeeded)
-            {
-                var userData = await GetUserDto(userFromDb, request.HttpContext);
-                return Result<object>.Success(userData);
-            }
-            else
-            {
-                return Result<object>.Failure("Login or password is invalid!");
-            }
-        }
-
-        private async Task<UserDataDto> GetUserDto(IdentityUser user, HttpContext context, bool addTokenIntoHeaders = true)
-        {
-            var userDto = new UserDataDto()
-            {
-                Id = user.Id,
-                UserName = user.UserName,
-                Roles = await this.userManager.GetRolesAsync(user)
-            };
-
-            if (addTokenIntoHeaders)
-            {
-                var token = await this.tokenService.CreateToken(user);
-                context.Response.Cookies.Append(".AspNetCore.Application.Id", token,
-                new CookieOptions
-                {
-                    HttpOnly = true,
-                    Expires = DateTime.UtcNow.AddHours(authParams.TokenExpirationTimeInHours),
-                    SameSite = SameSiteMode.None,
-                    Secure = true,
-                });
-            }
-
-            return userDto;
+            return result.IsSuccess ? Result<string>.Success(result.Message) : Result<string>.Failure(result.Message);
         }
     }
 }
