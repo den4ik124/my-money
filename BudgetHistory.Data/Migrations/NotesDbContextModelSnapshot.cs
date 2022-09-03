@@ -93,13 +93,13 @@ namespace BudgetHistory.Data.Migrations
 
             modelBuilder.Entity("RoomUser", b =>
                 {
-                    b.Property<Guid>("UserRoomsId")
+                    b.Property<Guid>("RoomsId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("UsersId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("UserRoomsId", "UsersId");
+                    b.HasKey("RoomsId", "UsersId");
 
                     b.HasIndex("UsersId");
 
@@ -110,7 +110,7 @@ namespace BudgetHistory.Data.Migrations
                 {
                     b.HasOne("BudgetHistory.Core.Models.Room", null)
                         .WithMany()
-                        .HasForeignKey("UserRoomsId")
+                        .HasForeignKey("RoomsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

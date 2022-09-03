@@ -9,10 +9,10 @@ namespace BudgetHistory.API.Middleware
     public class AuthTokenCheckerMiddleware
     {
         private readonly RequestDelegate next;
-        private readonly ILogger<ExceptionMiddleware> logger;
+        private readonly ILogger<AuthTokenCheckerMiddleware> logger;
 
         public AuthTokenCheckerMiddleware(RequestDelegate next,
-                                          ILogger<ExceptionMiddleware> logger)
+                                          ILogger<AuthTokenCheckerMiddleware> logger)
         {
             this.next = next;
             this.logger = logger;

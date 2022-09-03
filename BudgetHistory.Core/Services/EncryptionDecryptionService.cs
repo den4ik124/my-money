@@ -50,7 +50,7 @@ namespace BudgetHistory.Core.Services
                     {
                         using (var streamReader = new StreamReader(cryptoStream))
                         {
-                            return streamReader.ReadToEnd();
+                            return streamReader.ReadToEnd().Replace("\r\n", String.Empty);
                         }
                     }
                 }

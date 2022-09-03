@@ -1,13 +1,11 @@
 using BudgetHistory.API.Extensions;
 using BudgetHistory.API.Middleware;
-using BudgetHistory.Data.Seed.Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-using System;
 
 namespace BudgetHistory.API
 {
@@ -37,9 +35,7 @@ namespace BudgetHistory.API
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app,
-                              IWebHostEnvironment env,
-                              ISeedEmployees employeeSeeder,
-                              IServiceProvider serviceProvider)
+                              IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -57,8 +53,6 @@ namespace BudgetHistory.API
 
             app.UseAuthentication();
             app.UseAuthorization();
-
-            employeeSeeder.Seed(serviceProvider, Configuration);
 
             app.UseEndpoints(endpoints =>
             {

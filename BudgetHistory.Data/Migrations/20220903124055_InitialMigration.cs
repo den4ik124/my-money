@@ -57,15 +57,15 @@ namespace BudgetHistory.Data.Migrations
                 name: "RoomUser",
                 columns: table => new
                 {
-                    UserRoomsId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    RoomsId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UsersId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RoomUser", x => new { x.UserRoomsId, x.UsersId });
+                    table.PrimaryKey("PK_RoomUser", x => new { x.RoomsId, x.UsersId });
                     table.ForeignKey(
-                        name: "FK_RoomUser_Rooms_UserRoomsId",
-                        column: x => x.UserRoomsId,
+                        name: "FK_RoomUser_Rooms_RoomsId",
+                        column: x => x.RoomsId,
                         principalTable: "Rooms",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);

@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BudgetHistory.Data.Migrations
 {
     [DbContext(typeof(NotesDbContext))]
-    [Migration("20220903082726_InitialMigration")]
+    [Migration("20220903124055_InitialMigration")]
     partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -95,13 +95,13 @@ namespace BudgetHistory.Data.Migrations
 
             modelBuilder.Entity("RoomUser", b =>
                 {
-                    b.Property<Guid>("UserRoomsId")
+                    b.Property<Guid>("RoomsId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("UsersId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("UserRoomsId", "UsersId");
+                    b.HasKey("RoomsId", "UsersId");
 
                     b.HasIndex("UsersId");
 
@@ -112,7 +112,7 @@ namespace BudgetHistory.Data.Migrations
                 {
                     b.HasOne("BudgetHistory.Core.Models.Room", null)
                         .WithMany()
-                        .HasForeignKey("UserRoomsId")
+                        .HasForeignKey("RoomsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

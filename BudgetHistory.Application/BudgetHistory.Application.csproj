@@ -23,8 +23,4 @@
     <ProjectReference Include="..\BudgetHistory.Core\BudgetHistory.Core.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Rooms\Commands\" />
-  </ItemGroup>
-
 </Project>
