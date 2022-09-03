@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
+using BudgetHistory.Application.Core;
+using BudgetHistory.Application.DTOs;
+using BudgetHistory.Core.Interfaces.Repositories;
+using BudgetHistory.Core.Models;
 using MediatR;
-using Notebook.Application.Core;
-using Notebook.Application.DTOs;
-using Notebook.Core;
-using Notebook.Core.Interfaces.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,17 +11,18 @@ using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Notebook.Application.Notes.Queries
+namespace BudgetHistory.Application.Notes.Queries
 {
     public class GetNotesQueryHandler : IRequestHandler<GetNotesQuery, Result<PagedList<NoteDto>>>
     {
-        private readonly IUnitOfWork unitOfWork;
+        //private readonly IUnitOfWork unitOfWork;
         private readonly IMapper mapper;
+
         private readonly IGenericRepository<Note> noteRepository;
 
         public GetNotesQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
         {
-            this.unitOfWork = unitOfWork;
+            //this.unitOfWork = unitOfWork;
             this.mapper = mapper;
             this.noteRepository = unitOfWork.GetGenericRepository<Note>();
         }

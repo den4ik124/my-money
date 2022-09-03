@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Notebook.Application.DTOs.Common
+namespace BudgetHistory.Application.DTOs.Common
 {
     public class DatesRangeDto
     {

@@ -1,4 +1,4 @@
-﻿namespace Notebook.Core
+﻿namespace BudgetHistory.Core.Models
 {
     public enum Currency
     {

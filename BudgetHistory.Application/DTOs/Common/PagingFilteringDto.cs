@@ -1,7 +1,7 @@
-﻿using Notebook.Application.Core;
+﻿using BudgetHistory.Application.Core;
 using System.ComponentModel.DataAnnotations;
 
-namespace Notebook.Application.DTOs.Common
+namespace BudgetHistory.Application.DTOs.Common
 {
     public class PagingFilteringDto
     {

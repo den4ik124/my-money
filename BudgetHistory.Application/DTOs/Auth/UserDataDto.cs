@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Notebook.Application.DTOs.Auth
+namespace BudgetHistory.Application.DTOs.Auth
 {
     public class UserDataDto
     {

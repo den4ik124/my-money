@@ -1,9 +1,9 @@
-﻿using MediatR;
+﻿using BudgetHistory.Application.Core;
+using BudgetHistory.Application.DTOs.Auth;
+using MediatR;
 using Microsoft.AspNetCore.Http;
-using Notebook.Application.Core;
-using Notebook.Application.DTOs.Auth;
 
-namespace Notebook.Application.Auth.Commands
+namespace BudgetHistory.Application.Auth.Commands
 {
     public class LoginCommand : IRequest<Result<object>>
     {

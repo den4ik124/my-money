@@ -1,4 +1,4 @@
-﻿namespace Notebook.Application.DTOs.Auth
+﻿namespace BudgetHistory.Application.DTOs.Auth
 {
     public class RoleDto
     {

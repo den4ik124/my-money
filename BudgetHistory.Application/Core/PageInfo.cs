@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace Notebook.Application.Core
+namespace BudgetHistory.Application.Core
 {
     public class PageInfo
     {

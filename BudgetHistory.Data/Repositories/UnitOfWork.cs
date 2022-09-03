@@ -1,9 +1,9 @@
-﻿using Notebook.Core.Interfaces.Repositories;
+﻿using BudgetHistory.Core.Interfaces.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Notebook.Data.Repositories
+namespace BudgetHistory.Data.Repositories
 {
     public class UnitOfWork : IUnitOfWork, IDisposable
     {

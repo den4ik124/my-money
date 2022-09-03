@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace BudgetHistory.Data.Migrations
+namespace BudgetHistory.Data.Migrations.UserDb
 {
     public partial class InitialMigration : Migration
     {

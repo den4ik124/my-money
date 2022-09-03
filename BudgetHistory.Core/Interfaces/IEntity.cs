@@ -1,4 +1,4 @@
-﻿namespace Notebook.Core.Interfaces
+﻿namespace BudgetHistory.Core.Interfaces
 {
     public interface IEntity
     {

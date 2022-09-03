@@ -1,19 +1,19 @@
-﻿using Microsoft.AspNetCore.Authentication.Cookies;
+﻿using BudgetHistory.Core.AppSettings;
+using BudgetHistory.Core.Constants;
+using BudgetHistory.Core.Services;
+using BudgetHistory.Data;
+using BudgetHistory.Data.Seed.Interfaces;
+using BudgetHistory.Data.Seed.Seeders;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using Notebook.Core.AppSettings;
-using Notebook.Core.Constants;
-using Notebook.Core.Services;
-using Notebook.Data;
-using Notebook.Data.Seed.Interfaces;
-using Notebook.Data.Seed.Seeders;
 using System.Text;
 
-namespace Notebook.API.Extensions
+namespace BudgetHistory.API.Extensions
 {
     public static class IdentityServicesExtensions
     {

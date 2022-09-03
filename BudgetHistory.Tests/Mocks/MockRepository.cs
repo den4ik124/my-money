@@ -1,12 +1,12 @@
-﻿using Moq;
-using Notebook.Core;
-using Notebook.Core.Interfaces.Repositories;
+﻿using BudgetHistory.Core.Interfaces.Repositories;
+using BudgetHistory.Core.Models;
+using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 
-namespace Notebook.Tests.Mocks
+namespace BudgetHistory.Tests.Mocks
 {
     public static class MockRepository
     {

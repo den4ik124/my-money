@@ -4,7 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
-namespace Notebook.Core.Interfaces.Repositories
+namespace BudgetHistory.Core.Interfaces.Repositories
 {
     public interface IGenericRepository<TEntity> : IBaseRepository where TEntity : class
     {

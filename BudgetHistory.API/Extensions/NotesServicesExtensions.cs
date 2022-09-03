@@ -1,13 +1,15 @@
-﻿using MediatR;
+﻿using BudgetHistory.Application.Notes.Queries;
+using BudgetHistory.Core.Interfaces;
+using BudgetHistory.Core.Interfaces.Repositories;
+using BudgetHistory.Core.Services;
+using BudgetHistory.Data;
+using BudgetHistory.Data.Repositories;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Notebook.Application.Notes.Queries;
-using Notebook.Core.Interfaces.Repositories;
-using Notebook.Data;
-using Notebook.Data.Repositories;
 
-namespace Notebook.API.Extensions
+namespace BudgetHistory.API.Extensions
 {
     public static class NotesServicesExtensions
     {
@@ -19,6 +21,7 @@ namespace Notebook.API.Extensions
             });
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddSingleton<IEncryptionDecryption, EncryptionDecryptionService>();
 
             var context = services.BuildServiceProvider().GetService<NotesDbContext>();
             context.Database.Migrate();

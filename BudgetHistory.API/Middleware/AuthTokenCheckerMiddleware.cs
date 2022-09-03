@@ -1,18 +1,18 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using BudgetHistory.Core.Constants;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Notebook.Core.Constants;
 using System;
 using System.Threading.Tasks;
 
-namespace Notebook.API.Middleware
+namespace BudgetHistory.API.Middleware
 {
     public class AuthTokenCheckerMiddleware
     {
         private readonly RequestDelegate next;
-        private readonly ILogger<ExceptionMiddleware> logger;
+        private readonly ILogger<AuthTokenCheckerMiddleware> logger;
 
         public AuthTokenCheckerMiddleware(RequestDelegate next,
-                                          ILogger<ExceptionMiddleware> logger)
+                                          ILogger<AuthTokenCheckerMiddleware> logger)
         {
             this.next = next;
             this.logger = logger;

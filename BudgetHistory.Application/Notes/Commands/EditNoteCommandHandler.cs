@@ -1,13 +1,13 @@
 ﻿using AutoMapper;
+using BudgetHistory.Application.Core;
+using BudgetHistory.Core.Interfaces.Repositories;
+using BudgetHistory.Core.Models;
 using MediatR;
-using Notebook.Application.Core;
-using Notebook.Core;
-using Notebook.Core.Interfaces.Repositories;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Notebook.Application.Notes.Commands
+namespace BudgetHistory.Application.Notes.Commands
 {
     public class EditNoteCommandHandler : IRequestHandler<EditNoteCommand, Result<string>>
     {

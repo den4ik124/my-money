@@ -1,9 +1,9 @@
 using AutoMapper;
+using BudgetHistory.API.Mappings;
+using BudgetHistory.Core.Interfaces.Repositories;
 using Moq;
-using Notebook.API.Mappings;
-using Notebook.Core.Interfaces.Repositories;
 
-namespace Notebook.Tests
+namespace BudgetHistory.Tests
 {
     public class NotesBaseTest
     {

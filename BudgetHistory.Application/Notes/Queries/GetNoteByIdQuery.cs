@@ -1,9 +1,9 @@
-﻿using MediatR;
-using Notebook.Application.Core;
-using Notebook.Application.DTOs;
+﻿using BudgetHistory.Application.Core;
+using BudgetHistory.Application.DTOs;
+using MediatR;
 using System;
 
-namespace Notebook.Application.Notes.Queries
+namespace BudgetHistory.Application.Notes.Queries
 {
     public class GetNoteByIdQuery : IRequest<Result<NoteDto>>
     {

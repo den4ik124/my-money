@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Notebook.Core.Constants
+namespace BudgetHistory.Core.Constants
 {
     [Flags]
     public enum Roles

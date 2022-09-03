@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Notebook.Application.Core
+namespace BudgetHistory.Application.Core
 {
     public class PagedList<T>
     {

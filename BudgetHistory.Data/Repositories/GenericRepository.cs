@@ -1,12 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Notebook.Core.Interfaces.Repositories;
+﻿using BudgetHistory.Core.Interfaces.Repositories;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
-namespace Notebook.Data.Repositories
+namespace BudgetHistory.Data.Repositories
 {
     public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEntity : class
     {

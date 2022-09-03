@@ -1,14 +1,14 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using BudgetHistory.Application.DTOs;
+using BudgetHistory.Application.DTOs.Common;
+using BudgetHistory.Application.Notes.Commands;
+using BudgetHistory.Application.Notes.Queries;
+using BudgetHistory.Core.Constants;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Notebook.Application.DTOs;
-using Notebook.Application.DTOs.Common;
-using Notebook.Application.Notes.Commands;
-using Notebook.Application.Notes.Queries;
-using Notebook.Core.Constants;
 using System;
 using System.Threading.Tasks;
 
-namespace Notebook.API.Controllers
+namespace BudgetHistory.API.Controllers
 {
     [Authorize(Policy = nameof(Policies.CustomerAccess))]
     public class NotesController : BaseApiController

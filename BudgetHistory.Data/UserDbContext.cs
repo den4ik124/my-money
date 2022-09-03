@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace Notebook.Data
+namespace BudgetHistory.Data
 {
     public class UserDbContext : IdentityDbContext
     {

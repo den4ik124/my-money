@@ -1,15 +1,13 @@
+using BudgetHistory.API.Extensions;
+using BudgetHistory.API.Middleware;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-using Notebook.API.Extensions;
-using Notebook.API.Middleware;
-using Notebook.Data.Seed.Interfaces;
-using System;
 
-namespace Notebook.API
+namespace BudgetHistory.API
 {
     public class Startup
     {
@@ -37,9 +35,7 @@ namespace Notebook.API
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app,
-                              IWebHostEnvironment env,
-                              ISeedEmployees employeeSeeder,
-                              IServiceProvider serviceProvider)
+                              IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -57,8 +53,6 @@ namespace Notebook.API
 
             app.UseAuthentication();
             app.UseAuthorization();
-
-            employeeSeeder.Seed(serviceProvider, Configuration);
 
             app.UseEndpoints(endpoints =>
             {
