@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace BudgetHistory.Auth
@@ -75,7 +76,7 @@ namespace BudgetHistory.Auth
             var result = await userManager.CreateAsync(identityUser, password);
             if (!result.Succeeded)
             {
-                errorMessage = string.Join("|", result.Errors);
+                errorMessage = string.Join("|", result.Errors.Select(e => e.Description));
                 logger.LogError(errorMessage);
                 return new AuthResult() { IsSuccess = result.Succeeded, Message = errorMessage };
             }
@@ -91,7 +92,7 @@ namespace BudgetHistory.Auth
             var addToRoleResult = await userManager.AddToRoleAsync(userFromDb, nameof(Roles.Customer));
             if (!addToRoleResult.Succeeded)
             {
-                errorMessage = string.Join('|', addToRoleResult.Errors);
+                errorMessage = string.Join('|', addToRoleResult.Errors.Select(e => e.Description));
                 logger.LogError(errorMessage);
                 return new AuthResult() { IsSuccess = false, Message = errorMessage };
             }

@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using BudgetHistory.Application.Core;
-using BudgetHistory.Application.DTOs;
+using BudgetHistory.Application.DTOs.Note;
 using BudgetHistory.Core.Interfaces.Repositories;
 using BudgetHistory.Core.Models;
 using MediatR;

@@ -44,7 +44,7 @@ namespace BudgetHistory.Data.Seed.Seeders
                 {
                     Id = Guid.NewGuid(),
                     Email = administrator.Email,
-                    Name = login,
+                    UserName = login,
                     AssociatedIdentityUserId = adminId,
                     Rooms = new List<Room>()
                 };

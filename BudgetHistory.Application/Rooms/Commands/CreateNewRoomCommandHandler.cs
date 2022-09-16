@@ -43,7 +43,8 @@ namespace BudgetHistory.Application.Rooms.Commands
             {
                 return Result<string>.Failure("Creation failed. User does not exist.");
             }
-            request.NewRoomDto.OwnerId = user.Id;
+
+            room.OwnerId = user.Id;
 
             user.Rooms.Append(room);
             var isUserUpdated = userRepository.Update(user);

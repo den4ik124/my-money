@@ -1,5 +1,5 @@
-﻿using BudgetHistory.Application.DTOs;
-using BudgetHistory.Application.DTOs.Common;
+﻿using BudgetHistory.Application.DTOs.Common;
+using BudgetHistory.Application.DTOs.Note;
 using BudgetHistory.Application.Notes.Commands;
 using BudgetHistory.Application.Notes.Queries;
 using BudgetHistory.Core.Constants;

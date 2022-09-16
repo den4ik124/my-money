@@ -6,6 +6,9 @@ namespace BudgetHistory.Application.DTOs.Auth
     {
         [MaxLength(50)]
         public string UserName { get; set; }
+        
+        [MaxLength(50)]
+        public string Email { get; set; }
 
         [Required, DataType(DataType.Password)]
         public string Password { get; set; }
