@@ -15,7 +15,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{8B1C407B
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BudgetHistory.Tests", "BudgetHistory.Tests\BudgetHistory.Tests.csproj", "{155FA293-EFF5-4C0C-A26C-E6C905DDE514}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestProject", "TestProject\TestProject.csproj", "{9A681DC0-4C7D-437D-A758-B3307F436B46}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestProject", "TestProject\TestProject.csproj", "{9A681DC0-4C7D-437D-A758-B3307F436B46}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BudgetHistory.Auth", "BudgetHistory.Auth\BudgetHistory.Auth.csproj", "{67D30A7E-6F9D-4BCB-8B6E-23FBFCE61379}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,6 +49,10 @@ Global
 		{9A681DC0-4C7D-437D-A758-B3307F436B46}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9A681DC0-4C7D-437D-A758-B3307F436B46}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9A681DC0-4C7D-437D-A758-B3307F436B46}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67D30A7E-6F9D-4BCB-8B6E-23FBFCE61379}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67D30A7E-6F9D-4BCB-8B6E-23FBFCE61379}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67D30A7E-6F9D-4BCB-8B6E-23FBFCE61379}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67D30A7E-6F9D-4BCB-8B6E-23FBFCE61379}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

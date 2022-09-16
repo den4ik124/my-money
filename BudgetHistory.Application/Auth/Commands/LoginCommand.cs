@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace BudgetHistory.Application.Auth.Commands
 {
-    public class LoginCommand : IRequest<Result<object>>
+    public class LoginCommand : IRequest<Result<string>>
     {
         public UserLoginDto UserLoginDto { get; set; }
         public HttpContext HttpContext { get; set; }

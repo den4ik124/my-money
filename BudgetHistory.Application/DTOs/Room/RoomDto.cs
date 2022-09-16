@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace BudgetHistory.Application.DTOs
+namespace BudgetHistory.Application.DTOs.Room
 {
     public class RoomDto
     {

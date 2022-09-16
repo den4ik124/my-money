@@ -1,7 +1,7 @@
 ﻿using BudgetHistory.Core.Models;
 using System;
 
-namespace BudgetHistory.Application.DTOs
+namespace BudgetHistory.Application.DTOs.Note
 {
     public class NoteDto
     {

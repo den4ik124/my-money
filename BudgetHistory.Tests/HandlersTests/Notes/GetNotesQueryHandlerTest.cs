@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading;
 using Xunit;
 
-namespace BudgetHistory.Tests.HandlersTests
+namespace BudgetHistory.Tests.HandlersTests.Notes
 {
     public class GetNotesQueryHandlerTest : NotesBaseTest
     {
@@ -19,7 +19,7 @@ namespace BudgetHistory.Tests.HandlersTests
             UnitOfWorkMock.Setup(x => x.GetGenericRepository<Note>()).Returns(genRepoMock.Object);
 
             //Arrange
-            var handler = new GetNotesQueryHandler(base.UnitOfWorkMock.Object, base.Mapper);
+            var handler = new GetNotesQueryHandler(UnitOfWorkMock.Object, Mapper);
             var pageParameters = new PagingFilteringDto()
             {
                 PageInfo = new Application.Core.PageInfo()

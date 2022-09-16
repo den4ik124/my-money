@@ -1,4 +1,6 @@
-﻿using BudgetHistory.Core.AppSettings;
+﻿using BudgetHistory.Auth;
+using BudgetHistory.Auth.Interfaces;
+using BudgetHistory.Core.AppSettings;
 using BudgetHistory.Core.Constants;
 using BudgetHistory.Core.Services;
 using BudgetHistory.Data;
@@ -90,6 +92,7 @@ namespace BudgetHistory.API.Extensions
             });
 
             services.AddTransient<ISeedEmployees, SeedEmployees>();
+            services.AddTransient<IAuthService, AuthService>();
 
             services.AddScoped<TokenService>();
 

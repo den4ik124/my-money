@@ -1,5 +1,5 @@
 ﻿using BudgetHistory.Application.Core;
-using BudgetHistory.Application.DTOs;
+using BudgetHistory.Application.DTOs.Room;
 using MediatR;
 
 namespace BudgetHistory.Application.Rooms.Commands
