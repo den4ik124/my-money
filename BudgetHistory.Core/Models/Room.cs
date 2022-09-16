@@ -11,5 +11,6 @@ namespace BudgetHistory.Core.Models
         public DateTime DateOfCreation { get; set; }
         public string Name { get; set; }
         public string Password { get; set; }
+        public IEnumerable<Note> Notes { get; set; }
     }
 }

@@ -1,4 +1,4 @@
-using BudgetHistory.Application.DTOs;
+using BudgetHistory.Application.DTOs.Note;
 using BudgetHistory.Application.Notes.Commands;
 using BudgetHistory.Core.Models;
 using Shouldly;

@@ -55,7 +55,7 @@ namespace BudgetHistory.Auth
             var result = await signInManager.CheckPasswordSignInAsync(userFromDB, password, false);
             if (result.Succeeded)
             {
-                var token = await this.tokenService.CreateToken(userFromDB);
+                var token = await this.tokenService.CreateAuthTokenAsync(userFromDB);
                 context.Response.Cookies.Append(".AspNetCore.Application.Id", token,
                 new CookieOptions
                 {

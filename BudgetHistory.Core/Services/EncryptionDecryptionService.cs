@@ -38,23 +38,16 @@ namespace BudgetHistory.Core.Services
 
             var keyBytes = CheckPasswordLength(secretKey);
 
-            using (var aes = Aes.Create())
-            {
-                aes.Key = keyBytes;
-                aes.IV = iv;
-                ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
+            using var aes = Aes.Create();
+            aes.Key = keyBytes;
+            aes.IV = iv;
+            ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
 
-                using (var memoryStream = new MemoryStream(buffer))
-                {
-                    using (var cryptoStream = new CryptoStream(memoryStream, decryptor, CryptoStreamMode.Read))
-                    {
-                        using (var streamReader = new StreamReader(cryptoStream))
-                        {
-                            return streamReader.ReadToEnd().Replace("\r\n", String.Empty);
-                        }
-                    }
-                }
-            }
+            using var memoryStream = new MemoryStream(buffer);
+            using var cryptoStream = new CryptoStream(memoryStream, decryptor, CryptoStreamMode.Read);
+            using var streamReader = new StreamReader(cryptoStream);
+
+            return streamReader.ReadToEnd().Replace("\r\n", String.Empty);
         }
 
         private static byte[] CheckPasswordLength(string secretKey)
