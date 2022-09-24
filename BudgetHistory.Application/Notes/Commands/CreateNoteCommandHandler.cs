@@ -1,10 +1,9 @@
 ﻿using AutoMapper;
 using BudgetHistory.Application.Core;
-using BudgetHistory.Core.Interfaces.Repositories;
 using BudgetHistory.Core.Models;
+using BudgetHistory.Core.Services.Interfaces;
 using MediatR;
 using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,26 +11,21 @@ namespace BudgetHistory.Application.Notes.Commands
 {
     public class CreateNoteCommandHandler : IRequestHandler<CreateNoteCommand, Result<string>>
     {
-        private readonly IUnitOfWork unitOfWork;
         private readonly IMapper mapper;
+        private readonly INoteService noteService;
 
-        public CreateNoteCommandHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        public CreateNoteCommandHandler(IMapper mapper, INoteService noteService)
         {
-            this.unitOfWork = unitOfWork;
             this.mapper = mapper;
+            this.noteService = noteService;
         }
 
         public async Task<Result<string>> Handle(CreateNoteCommand request, CancellationToken cancellationToken)
         {
-            var repo = this.unitOfWork.GetGenericRepository<Note>();
-            request.NoteDto.Id = Guid.NewGuid();
-            var currentBalance = repo.GetQuery().OrderBy(x => x.DateOfCreation).Last().Balance;
-            request.NoteDto.Balance = currentBalance + request.NoteDto.Value;
-
             var noteModel = this.mapper.Map<Note>(request.NoteDto);
-            if (await repo.Add(noteModel))
+            var currencyEnum = Enum.Parse<Currency>(request.NoteDto.Currency);
+            if (await noteService.CreateNewNote(noteModel, currencyEnum, request.NoteDto.Value, request.NoteDto.RoomId))
             {
-                await this.unitOfWork.CompleteAsync();
                 return Result<string>.Success("Creation succeeded.");
             }
             return Result<string>.Failure("Creation failed.");

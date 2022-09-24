@@ -97,6 +97,7 @@ namespace BudgetHistory.Auth
                 return new AuthResult() { IsSuccess = false, Message = errorMessage };
             }
 
+            user.Id = Guid.NewGuid();
             user.AssociatedIdentityUserId = new Guid(userFromDb.Id);
 
             if (await unitOfWork.GetGenericRepository<User>().Add(user))

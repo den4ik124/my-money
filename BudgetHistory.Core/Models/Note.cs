@@ -9,6 +9,8 @@ namespace BudgetHistory.Core.Models
         public decimal Value { get; set; }
         public Currency Currency { get; set; }
         public DateTime DateOfCreation { get; set; }
+
+        //[DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public decimal Balance { get; set; }
     }
 }

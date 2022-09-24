@@ -6,6 +6,6 @@ namespace BudgetHistory.Application.Notes.Commands
 {
     public class CreateNoteCommand : IRequest<Result<string>>
     {
-        public NoteDto NoteDto { get; set; }
+        public NoteCreationDto NoteDto { get; set; }
     }
 }

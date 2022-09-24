@@ -22,6 +22,7 @@ namespace BudgetHistory.Application.Notes.Commands
 
         public async Task<Result<string>> Handle(EditNoteCommand request, CancellationToken cancellationToken)
         {
+            //TODO: переделать редактирование записей. С учетом изменения баланса.
             await this.unitOfWork.BeginTransactionAsync();
             var repository = this.unitOfWork.GetGenericRepository<Note>();
             var noteFromDb = repository.GetQuery(note => note.Id == request.EditedNote.Id).FirstOrDefault();
