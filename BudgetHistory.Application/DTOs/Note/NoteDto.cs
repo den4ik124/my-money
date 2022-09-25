@@ -10,14 +10,8 @@ namespace BudgetHistory.Application.DTOs.Note
         public decimal Value { get; set; }
         public string Currency { get; set; }
         public DateTime DateOfCreation { get; set; }
+        public DateTime DateOfLastModification { get; set; }
         public decimal Balance { get; set; }
-    }
-
-    public class NoteCreationDto
-    {
-        public Guid UserId { get; set; }
-        public Guid RoomId { get; set; }
-        public decimal Value { get; set; }
-        public string Currency { get; set; }
+        public bool IsDeleted { get; set; }
     }
 }

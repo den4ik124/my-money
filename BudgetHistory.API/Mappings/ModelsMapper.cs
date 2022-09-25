@@ -13,6 +13,7 @@ namespace BudgetHistory.API.Mappings
     {
         public ModelsMapper()
         {
+            CreateMap<Note, Note>();
             CreateMap<Note, NoteDto>()
                 .ForMember(d => d.Currency, op => op.MapFrom(src => src.Currency.ToString()));
             CreateMap<NoteDto, Note>()

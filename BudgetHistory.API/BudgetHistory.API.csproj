@@ -20,7 +20,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BudgetHistory.Application\BudgetHistory.Application.csproj" />
-    <ProjectReference Include="..\BudgetHistory.Data\BudgetHistory.Data.csproj" />
   </ItemGroup>
 
 </Project>

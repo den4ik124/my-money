@@ -8,10 +8,8 @@ namespace BudgetHistory.Core.Services.Interfaces
     {
         Task<bool> CreateNewNote(Note newNote, Currency currency, decimal value, Guid roomId);
 
-        bool UpdateNote(Note updatedNote);
+        Task<bool> UpdateNote(Note updatedNote);
 
-        bool DeleteNote(Guid noteId);
-
-        bool RecalculateBalance(Guid editedNoteId);
+        Task<bool> DeleteNote(Guid noteId);
     }
 }
