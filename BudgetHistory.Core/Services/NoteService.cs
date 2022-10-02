@@ -63,7 +63,10 @@ namespace BudgetHistory.Core.Services
             await this.unitOfWork.BeginTransactionAsync();
             var repository = this.unitOfWork.GetGenericRepository<Note>();
             var noteFromDb = await repository.GetById(updatedNote.Id);
-
+            if (noteFromDb is null)
+            {
+                return false;
+            }
             if (noteFromDb.Value == updatedNote.Value)
             {
                 updatedNote.DateOfModification = DateTime.UtcNow;

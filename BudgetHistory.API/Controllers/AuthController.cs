@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace BudgetHistory.Api.Controllers
 {
+    [AllowAnonymous]
     public class AuthController : BaseApiController
     {
-        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<IActionResult> Login(UserLoginDto userDto)
         {
@@ -21,7 +21,6 @@ namespace BudgetHistory.Api.Controllers
             }));
         }
 
-        [AllowAnonymous]
         [HttpPost("register")]
         public async Task<IActionResult> Купшыеук(UserRegistrationDto userRegistrationDto)
         {
