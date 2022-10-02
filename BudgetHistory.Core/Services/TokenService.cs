@@ -1,4 +1,5 @@
 ﻿using BudgetHistory.Core.AppSettings;
+using BudgetHistory.Core.Constants;
 using BudgetHistory.Core.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
@@ -44,9 +45,9 @@ namespace BudgetHistory.Core.Services
         {
             var claims = new List<Claim>()
             {
-                new Claim(ClaimTypes.Name, room.Name),
-                new Claim(ClaimTypes.NameIdentifier, room.Id.ToString()),
-                new Claim(ClaimTypes.UserData, userId),
+                new Claim(ClaimConstants.RoomName, room.Name),
+                new Claim(ClaimConstants.RoomId, room.Id.ToString()),
+                new Claim(ClaimConstants.UserId, userId),
             };
 
             PrepareTokenData(claims, out JwtSecurityTokenHandler tokenHandler, out SecurityToken token);

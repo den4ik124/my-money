@@ -50,6 +50,7 @@ namespace BudgetHistory.API
             app.UseRouting();
 
             app.UseMiddleware<AuthTokenCheckerMiddleware>();
+            app.UseMiddleware<RoomTokenCheckerMiddleware>();
 
             app.UseAuthentication();
             app.UseAuthorization();

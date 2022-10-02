@@ -9,5 +9,6 @@ namespace BudgetHistory.Core.Constants
         ManagerAccess = 2,
         CustomerAccess = 4,
         GuestAccess = 8,
+        RoomLoggedIn = 16,
     }
 }

@@ -1,6 +1,8 @@
 ﻿using BudgetHistory.Application.DTOs.Room;
 using BudgetHistory.Application.Rooms.Commands;
 using BudgetHistory.Application.Rooms.Queries;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Security.Claims;
@@ -8,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace BudgetHistory.API.Controllers
 {
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class RoomController : BaseApiController
     {
         [HttpGet()]

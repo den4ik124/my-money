@@ -56,7 +56,7 @@ namespace BudgetHistory.Auth
             if (result.Succeeded)
             {
                 var token = await this.tokenService.CreateAuthTokenAsync(userFromDB);
-                context.Response.Cookies.Append(".AspNetCore.Application.Id", token,
+                context.Response.Cookies.Append(Cookies.ApplicationId, token,
                 new CookieOptions
                 {
                     HttpOnly = true,
