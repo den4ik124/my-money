@@ -2,6 +2,7 @@
 using BudgetHistory.Core.Interfaces;
 using BudgetHistory.Core.Interfaces.Repositories;
 using BudgetHistory.Core.Services;
+using BudgetHistory.Core.Services.Interfaces;
 using BudgetHistory.Data;
 using BudgetHistory.Data.Repositories;
 using MediatR;
@@ -22,6 +23,7 @@ namespace BudgetHistory.API.Extensions
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddSingleton<IEncryptionDecryption, EncryptionDecryptionService>();
+            services.AddTransient<INoteService, NoteService>();
 
             var context = services.BuildServiceProvider().GetService<NotesDbContext>();
             context.Database.Migrate();

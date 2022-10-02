@@ -29,7 +29,7 @@ namespace BudgetHistory.API.Controllers
         }
 
         [HttpPost("create")]
-        public async Task<IActionResult> CreateNewNote(NoteDto newNoteData)
+        public async Task<IActionResult> CreateNewNote(NoteCreationDto newNoteData)
         {
             return HandleResult(await this.Mediator.Send(new CreateNoteCommand() { NoteDto = newNoteData }));
         }

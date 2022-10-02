@@ -2,8 +2,8 @@
 using BudgetHistory.Application.Core;
 using BudgetHistory.Core.Interfaces.Repositories;
 using BudgetHistory.Core.Models;
+using BudgetHistory.Core.Services.Interfaces;
 using MediatR;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -11,36 +11,25 @@ namespace BudgetHistory.Application.Notes.Commands
 {
     public class EditNoteCommandHandler : IRequestHandler<EditNoteCommand, Result<string>>
     {
+        private readonly INoteService noteService;
         private readonly IUnitOfWork unitOfWork;
         private readonly IMapper mapper;
 
-        public EditNoteCommandHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        public EditNoteCommandHandler(INoteService noteService, IUnitOfWork unitOfWork, IMapper mapper)
         {
+            this.noteService = noteService;
             this.unitOfWork = unitOfWork;
             this.mapper = mapper;
         }
 
         public async Task<Result<string>> Handle(EditNoteCommand request, CancellationToken cancellationToken)
         {
-            await this.unitOfWork.BeginTransactionAsync();
-            var repository = this.unitOfWork.GetGenericRepository<Note>();
-            var noteFromDb = repository.GetQuery(note => note.Id == request.EditedNote.Id).FirstOrDefault();
-            if (noteFromDb == null)
-            {
-                return Result<string>.Failure($"Such note does not exists \n(Id = {request.EditedNote.Id}).");
-            }
-            this.mapper.Map(request.EditedNote, noteFromDb);
-            if (!repository.Update(noteFromDb))
-            {
-                return Result<string>.Failure($"Note (Id : {request.EditedNote.Id}) edit has been canceled.");
-            }
+            var note = this.mapper.Map<Note>(request.EditedNote);
 
-            if (await this.unitOfWork.CompleteAsync())
+            if (await noteService.UpdateNote(note))
             {
-                this.unitOfWork.TransactionCommit();
                 return Result<string>.Success("Success");
             }
-
             return Result<string>.Failure($"Note (Id : {request.EditedNote.Id}) edit has been canceled.");
         }
     }

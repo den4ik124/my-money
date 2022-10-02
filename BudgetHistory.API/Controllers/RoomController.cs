@@ -14,27 +14,39 @@ namespace BudgetHistory.API.Controllers
         public async Task<IActionResult> GetRoomsList()
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userId is null)
-            {
-                return BadRequest("Unknown user.");
-            }
-            return HandleResult(await Mediator.Send(new GetRoomsQuery() { UserId = new Guid(userId) }));
-            //return new OkObjectResult("Rooms list here");
+
+            return userId is null
+                ? BadRequest("Unknown user.")
+                : HandleResult(await Mediator.Send(new GetRoomsQuery() { UserId = new Guid(userId) }));
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetRoomById(Guid id)
+        [HttpGet("{roomId}")]
+        public async Task<IActionResult> GetRoomById(string roomId)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
-
-            return new OkObjectResult($"UserId: {userId}");
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            return userId is null
+                ? BadRequest("Unknown user.")
+                : HandleResult(await Mediator.Send(new GetRoomByIdQuery() { HttpContext = this.HttpContext, UserId = userId, RoomId = roomId }));
         }
 
         [HttpPost("create-new-room")]
         public async Task<IActionResult> CreateNewRoom(RoomDto newRoom)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
-            return HandleResult(await Mediator.Send(new CreateNewRoomCommand() { NewRoomDto = newRoom, UserId = userId }));
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            return userId is null
+                ? BadRequest("Unknown user.")
+                : HandleResult(await Mediator.Send(new CreateNewRoomCommand() { NewRoomDto = newRoom, UserId = userId }));
+        }
+
+        [HttpPost("room-login")]
+        public async Task<IActionResult> LoginRoom(LoginRoomDto loginRoomDto)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            return userId is null
+                ? BadRequest("Unknown user.")
+                : HandleResult(await Mediator.Send(new LoginRoomCommand() { CurrentUserId = userId, HttpContext = this.HttpContext, LoginRoomDto = loginRoomDto }));
         }
     }
 }

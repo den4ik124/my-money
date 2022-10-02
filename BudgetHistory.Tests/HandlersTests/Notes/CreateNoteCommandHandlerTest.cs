@@ -1,6 +1,7 @@
-using BudgetHistory.Application.DTOs;
+using BudgetHistory.Application.DTOs.Note;
 using BudgetHistory.Application.Notes.Commands;
 using BudgetHistory.Core.Models;
+using BudgetHistory.Core.Services;
 using Shouldly;
 using System;
 using System.Threading;
@@ -15,18 +16,17 @@ namespace BudgetHistory.Tests.HandlersTests.Notes
         {
             var genRepoMock = Mocks.MockRepository.GetMockedNoteRepository();
             UnitOfWorkMock.Setup(x => x.GetGenericRepository<Note>()).Returns(genRepoMock.Object);
-
+            var noteService = new NoteService(UnitOfWorkMock.Object);
             var itemsCountBefore = await genRepoMock.Object.GetItemsCount();
             //Arrange
-            var handler = new CreateNoteCommandHandler(UnitOfWorkMock.Object, Mapper);
+            var handler = new CreateNoteCommandHandler(Mapper, noteService);
 
             var request = new CreateNoteCommand()
             {
-                NoteDto = new NoteDto()
+                NoteDto = new NoteCreationDto()
                 {
                     Value = 100,
-                    Currency = Currency.USD,
-                    DateOfCreation = DateTime.Now,
+                    Currency = Currency.USD.ToString(),
                     RoomId = Guid.NewGuid(),
                     UserId = Guid.NewGuid()
                 }
