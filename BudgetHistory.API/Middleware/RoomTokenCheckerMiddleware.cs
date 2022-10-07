@@ -26,7 +26,7 @@ namespace BudgetHistory.API.Middleware
                 if (!string.IsNullOrEmpty(token)
                     && string.IsNullOrEmpty(context.Request.Headers[Headers.RoomAuthorization]))
                 {
-                    context.Request.Headers.Add(Headers.RoomAuthorization, "RoomAuth " + token);
+                    context.Request.Headers.Add(Headers.RoomAuthorization, "Bearer " + token);
                 }
                 await this.next(context);
             }

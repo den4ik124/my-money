@@ -10,6 +10,5 @@ namespace BudgetHistory.Application.Rooms.Commands
         public string CurrentUserId { get; set; }
         public LoginRoomDto LoginRoomDto { get; set; }
         public HttpContext HttpContext { get; set; }
-        //public HttpResponse Response { get; set; }
     }
 }

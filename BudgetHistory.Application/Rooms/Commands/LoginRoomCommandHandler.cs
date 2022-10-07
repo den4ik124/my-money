@@ -66,7 +66,6 @@ namespace BudgetHistory.Application.Rooms.Commands
             });
 
             return Result<string>.Success($"Successful login.");
-            //return Result<string>.Success($"Successful login.\nRoom token: {token}");
         }
     }
 }

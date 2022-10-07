@@ -54,9 +54,9 @@ namespace BudgetHistory.API.Extensions
             services.AddAuthentication(options =>
             {
                 options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                //options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                //options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                //options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
             })
                 .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, opt =>
                 {
@@ -73,45 +73,12 @@ namespace BudgetHistory.API.Extensions
                         //ValidateLifetime = true,
                         //ClockSkew = TimeSpan.Zero
                     };
-                })
-                .AddJwtBearer("RoomAuth", opt =>
-                {
-                    opt.SaveToken = true;
-                    opt.RequireHttpsMetadata = true;
-                    opt.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = key,
-                        ValidateIssuer = true,
-                        ValidIssuer = authTokenParameters.Issuer,
-                        ValidateAudience = true,
-                        ValidAudience = authTokenParameters.Audience,
-                        //ValidateLifetime = true,
-                        //ClockSkew = TimeSpan.Zero
-                    };
                 });
-            //.AddPolicyScheme("ServiceAuth_RoomAuth", "ServiceAuth_RoomAuth", opt =>
-            //{
-            //    opt.ForwardDefaultSelector = context =>
-            //    {
-            //        string roomAuthorization = context.Request.Cookies[Cookies.RoomAuth];
-            //        if (!string.IsNullOrEmpty(roomAuthorization) && roomAuthorization.StartsWith("RoomAuth "))
-            //        {
-            //            return "RoomAuth";
-            //        }
-            //        return JwtBearerDefaults.AuthenticationScheme;
-            //    };
-            //});
 
             services.AddAuthorization(opt =>
             {
-                //var defaultAuthPolicyBuilder = new AuthorizationPolicyBuilder(JwtBearerDefaults.AuthenticationScheme, "RoomAuth");
-                //defaultAuthPolicyBuilder = defaultAuthPolicyBuilder.RequireAuthenticatedUser();
-                //opt.DefaultPolicy = defaultAuthPolicyBuilder.Build();
-
                 opt.AddPolicy(nameof(Policies.RoomLoggedIn), policy =>
                         {
-                            policy.AuthenticationSchemes.Add("RoomAuth");
                             policy.RequireAuthenticatedUser();
                             policy.Requirements.Add(new RoomLoggedInPolicy());
                         });

@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace BudgetHistory.API.Controllers
 {
-    [Authorize(AuthenticationSchemes = "RoomAuth", Policy = nameof(Policies.RoomLoggedIn))]
+    [Authorize(Policy = nameof(Policies.RoomLoggedIn))]
     public class NotesController : BaseApiController
     {
         [HttpPost("notes")]

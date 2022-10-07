@@ -32,7 +32,7 @@ namespace BudgetHistory.API.Extensions
 
             services.AddMediatR(typeof(GetNotesQueryHandler).Assembly);
 
-            services.AddSingleton<IAuthorizationHandler, RoomLoggedInHandler>();
+            services.AddTransient<IAuthorizationHandler, RoomLoggedInHandler>();
 
             return services;
         }
