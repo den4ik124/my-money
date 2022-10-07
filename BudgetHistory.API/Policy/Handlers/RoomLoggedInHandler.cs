@@ -34,7 +34,7 @@ namespace BudgetHistory.API.Policy.Handlers
             var userId = claims.FirstOrDefault(c => c.Type == ClaimConstants.UserId).Value;
 
             var roomFromDb = unitOfWork.GetGenericRepository<Room>().GetQuery(room => room.Id == new Guid(roomId)).Include(r => r.Users).FirstOrDefault();
-            var userFromDb = unitOfWork.GetGenericRepository<User>().GetQuery(user => user.Id == new Guid(userId)).FirstOrDefault();
+            var userFromDb = unitOfWork.GetGenericRepository<User>().GetQuery(user => user.AssociatedIdentityUserId == new Guid(userId)).FirstOrDefault();
 
             if (roomFromDb.Users.Contains(userFromDb))
             {
