@@ -1,4 +1,5 @@
-﻿using BudgetHistory.Auth;
+﻿using BudgetHistory.API.Policy;
+using BudgetHistory.Auth;
 using BudgetHistory.Auth.Interfaces;
 using BudgetHistory.Core.AppSettings;
 using BudgetHistory.Core.Constants;
@@ -76,6 +77,12 @@ namespace BudgetHistory.API.Extensions
 
             services.AddAuthorization(opt =>
             {
+                opt.AddPolicy(nameof(Policies.RoomLoggedIn), policy =>
+                        {
+                            policy.RequireAuthenticatedUser();
+                            policy.Requirements.Add(new RoomLoggedInPolicy());
+                        });
+
                 opt.AddPolicy(nameof(Policies.AdminAccess), policy => policy.RequireRole(nameof(Roles.Admin)));
                 opt.AddPolicy(nameof(Policies.ManagerAccess), policy => policy.RequireAssertion(context =>
                                         context.User.IsInRole(nameof(Roles.Admin)) ||

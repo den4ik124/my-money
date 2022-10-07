@@ -15,14 +15,12 @@ namespace BudgetHistory.Application.Notes.Queries
 {
     public class GetNotesQueryHandler : IRequestHandler<GetNotesQuery, Result<PagedList<NoteDto>>>
     {
-        //private readonly IUnitOfWork unitOfWork;
         private readonly IMapper mapper;
 
         private readonly IGenericRepository<Note> noteRepository;
 
         public GetNotesQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
         {
-            //this.unitOfWork = unitOfWork;
             this.mapper = mapper;
             this.noteRepository = unitOfWork.GetGenericRepository<Note>();
         }

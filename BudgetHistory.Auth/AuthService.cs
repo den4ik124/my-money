@@ -10,7 +10,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace BudgetHistory.Auth
@@ -56,7 +59,7 @@ namespace BudgetHistory.Auth
             if (result.Succeeded)
             {
                 var token = await this.tokenService.CreateAuthTokenAsync(userFromDB);
-                context.Response.Cookies.Append(".AspNetCore.Application.Id", token,
+                context.Response.Cookies.Append(Cookies.ApplicationId, token,
                 new CookieOptions
                 {
                     HttpOnly = true,
@@ -109,6 +112,13 @@ namespace BudgetHistory.Auth
             errorMessage = $"User ({identityUser.UserName}) can't be registered.";
             logger.LogError(errorMessage);
             return new AuthResult() { IsSuccess = false, Message = errorMessage };
+        }
+
+        public IEnumerable<Claim> DecodeToken(string authToken)
+        {
+            var jwtToken = authToken.Split(" ").Last();
+            var handler = new JwtSecurityTokenHandler();
+            return handler.ReadJwtToken(jwtToken).Claims;
         }
     }
 }

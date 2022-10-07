@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using BudgetHistory.Application.Core;
+using BudgetHistory.Core.Constants;
 using BudgetHistory.Core.Interfaces;
 using BudgetHistory.Core.Interfaces.Repositories;
 using BudgetHistory.Core.Models;
@@ -55,7 +56,7 @@ namespace BudgetHistory.Application.Rooms.Commands
             }
 
             var token = this.tokenService.CreateRoomSessionToken(room, request.CurrentUserId);
-            request.HttpContext.Response.Cookies.Append(".AspNetCore.Room.Session", token,
+            request.HttpContext.Response.Cookies.Append(Cookies.RoomAuth, token,
             new CookieOptions
             {
                 HttpOnly = true,
@@ -65,7 +66,6 @@ namespace BudgetHistory.Application.Rooms.Commands
             });
 
             return Result<string>.Success($"Successful login.");
-            //return Result<string>.Success($"Successful login.\nRoom token: {token}");
         }
     }
 }
