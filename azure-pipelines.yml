@@ -38,7 +38,7 @@ jobs:
       
   - task: replacetokens@5
     inputs:
-      rootDirectory: '${Pipeline.Workspace}/BudgetHistory.API'
+      rootDirectory: '$(Pipeline.Workspace)/BudgetHistory.API'
       targetFiles: '**/appsettings.json'
       encoding: 'auto'
       tokenPattern: 'default'
