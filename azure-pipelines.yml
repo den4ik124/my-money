@@ -4,6 +4,8 @@
 # https://docs.microsoft.com/azure/devops/pipelines/apps/aspnet/build-aspnet-4
 
 variables:
+- group : connection-strings
+- group : secrets
 - name: BuildParameters.RestoreBuildProjects
   value: '**/BudgetHistory.API.csproj'
 - name: BudgetHistory.Tests
@@ -18,6 +20,14 @@ jobs:
     vmImage: ubuntu-22.04
   steps:
   - checkout: self
+
+  - task: FileTransform@1
+    displayName: "Variables substitution"
+    inputs:
+      folderPath: '$(System.DefaultWorkingDirectory)/**/*.zip'
+      fileType: 'json'
+      targetFiles: '**/appsettings.json'
+
   - task: DotNetCoreCLI@2
     displayName: Restore
     inputs:
