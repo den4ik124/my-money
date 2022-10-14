@@ -24,7 +24,7 @@ jobs:
   - task: FileTransform@1
     displayName: "Variables substitution"
     inputs:
-      folderPath: '$(System.DefaultWorkingDirectory)/**/*.zip'
+      folderPath: 'BudgetHistory/**/*.zip'
       fileType: 'json'
       targetFiles: '**/appsettings.json'
 
