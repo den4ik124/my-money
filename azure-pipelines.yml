@@ -46,7 +46,7 @@ jobs:
       
   - task: replacetokens@5
     inputs:
-      rootDirectory: '$(Pipeline.Workspace)/BudgetHistory.API'
+      rootDirectory: '$(Pipeline.Workspace)/BudgetHistory'
       targetFiles: '**/appsettings.json'
       encoding: 'auto'
       tokenPattern: 'default'
@@ -59,7 +59,7 @@ jobs:
       enableRecursion: false
       useLegacyPattern: false
       enableTelemetry: false
-      
+
   - task: DotNetCoreCLI@2
     displayName: Test
     inputs:
