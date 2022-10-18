@@ -1,4 +1,4 @@
-using BudgetHistory.Core.Interfaces.Repositories;
+﻿using BudgetHistory.Core.Interfaces.Repositories;
 using BudgetHistory.Data;
 using BudgetHistory.Data.Seed.Interfaces;
 using Microsoft.AspNetCore.Hosting;
@@ -38,7 +38,7 @@ namespace BudgetHistory.API
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occured during Migration\n" + ex.Message);
+                logger.LogError(ex, "An error occured during Migration.\n" + ex.Message);
             }
             try
             {
