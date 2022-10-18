@@ -30,7 +30,7 @@ namespace BudgetHistory.API.Extensions
             });
 
             var context = services.BuildServiceProvider().GetService<UserDbContext>();
-            context.Database.Migrate();
+            //context.Database.Migrate();
 
             services.AddIdentityCore<IdentityUser>(opt =>
             {

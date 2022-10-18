@@ -29,7 +29,7 @@ namespace BudgetHistory.API.Extensions
             services.AddTransient<INoteService, NoteService>();
 
             var context = services.BuildServiceProvider().GetService<NotesDbContext>();
-            context.Database.Migrate();
+            //context.Database.Migrate();
 
             services.AddMediatR(typeof(GetNotesQueryHandler).Assembly);
 
