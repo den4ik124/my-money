@@ -29,9 +29,6 @@ namespace BudgetHistory.API.Extensions
                 opt.UseSqlServer(connectionString);
             });
 
-            var context = services.BuildServiceProvider().GetService<UserDbContext>();
-            context.Database.Migrate();
-
             services.AddIdentityCore<IdentityUser>(opt =>
             {
                 opt.Password.RequireDigit = true;
