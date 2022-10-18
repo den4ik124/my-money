@@ -23,10 +23,12 @@ namespace BudgetHistory.API.Extensions
         public static IServiceCollection AddIdentityServices(this IServiceCollection services,
             IConfiguration config)
         {
+            var connectionString = config.GetConnectionString("Budget.History.Users.Db");
             services.AddDbContext<UserDbContext>(opt =>
             {
-                opt.UseSqlServer(config.GetConnectionString("Budget.History.Users.Db"));
+                opt.UseSqlServer(connectionString);
             });
+
             var context = services.BuildServiceProvider().GetService<UserDbContext>();
             context.Database.Migrate();
 

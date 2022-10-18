@@ -18,9 +18,10 @@ namespace BudgetHistory.API.Extensions
     {
         public static IServiceCollection AddNotesServices(this IServiceCollection services, IConfiguration config)
         {
+            var connectionString = config.GetConnectionString("Budget.History.Db");
             services.AddDbContext<NotesDbContext>(opt =>
             {
-                opt.UseSqlServer(config.GetConnectionString("Budget.History.Db"));
+                opt.UseSqlServer(connectionString);
             });
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
