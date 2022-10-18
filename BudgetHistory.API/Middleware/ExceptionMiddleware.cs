@@ -1,4 +1,5 @@
 ﻿using BudgetHistory.Application.Core;
+using BudgetHistory.Logging.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -15,12 +16,14 @@ namespace BudgetHistory.API.Middleware
         private readonly RequestDelegate next;
         private readonly ILogger<ExceptionMiddleware> logger;
         private readonly IHostEnvironment env;
+        private readonly ITgLogger tgLogger;
 
-        public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger, IHostEnvironment env)
+        public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger, IHostEnvironment env, ITgLogger tgLogger)
         {
             this.next = next;
             this.logger = logger;
             this.env = env;
+            this.tgLogger = tgLogger;
         }
 
         public async Task InvokeAsync(HttpContext context)
@@ -32,6 +35,7 @@ namespace BudgetHistory.API.Middleware
             catch (Exception ex)
             {
                 this.logger.LogError(ex, ex.Message);
+                await this.tgLogger.LogError(ex.Message);
                 context.Response.ContentType = "application/json";
                 context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 

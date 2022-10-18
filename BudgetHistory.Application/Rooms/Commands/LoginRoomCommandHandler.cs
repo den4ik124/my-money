@@ -4,7 +4,7 @@ using BudgetHistory.Core.Constants;
 using BudgetHistory.Core.Interfaces;
 using BudgetHistory.Core.Interfaces.Repositories;
 using BudgetHistory.Core.Models;
-using BudgetHistory.Core.Services;
+using BudgetHistory.Core.Services.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -20,14 +20,14 @@ namespace BudgetHistory.Application.Rooms.Commands
         private readonly IUnitOfWork unitOfWork;
         private readonly IMapper mapper;
         private readonly IEncryptionDecryption encryptionDecryptionService;
-        private readonly TokenService tokenService;
+        private readonly ITokenService tokenService;
         private readonly IConfiguration config;
         private readonly UserManager<IdentityUser> userManager;
 
         public LoginRoomCommandHandler(IUnitOfWork unitOfWork,
                                        IMapper mapper,
                                        IEncryptionDecryption encryptionDecryptionService,
-                                       TokenService tokenService,
+                                       ITokenService tokenService,
                                        IConfiguration config,
                                        UserManager<IdentityUser> userManager)
         {

@@ -21,18 +21,18 @@ namespace BudgetHistory.Application.Notes.Queries
             this.mapper = mapper;
         }
 
-        public async Task<Result<NoteDto>> Handle(GetNoteByIdQuery request, CancellationToken cancellationToken)
+        public Task<Result<NoteDto>> Handle(GetNoteByIdQuery request, CancellationToken cancellationToken)
         {
             var noteFromDb = this.unitOfWork.GetGenericRepository<Note>()
                                             .GetQuery(note => note.Id == request.NoteId)
                                             .FirstOrDefault();
             if (noteFromDb == null)
             {
-                return Result<NoteDto>.Failure($"Such note (ID : {request.NoteId}) does not exist");
+                return Task.FromResult(Result<NoteDto>.Failure($"Such note (ID : {request.NoteId}) does not exist"));
             }
             var response = this.mapper.Map<NoteDto>(noteFromDb);
 
-            return Result<NoteDto>.Success(response);
+            return Task.FromResult(Result<NoteDto>.Success(response));
         }
     }
 }

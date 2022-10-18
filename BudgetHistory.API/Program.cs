@@ -22,7 +22,7 @@ namespace BudgetHistory.API
 
             var services = scope.ServiceProvider;
             var logger = services.GetService<ILogger<Program>>();
-
+            var tgLogger = services.GetService<ILogger>();
             try
             {
                 var dbContexts = new List<DbContext>()
@@ -39,6 +39,7 @@ namespace BudgetHistory.API
             catch (Exception ex)
             {
                 logger.LogError(ex, "An error occured during Migration.\n" + ex.Message);
+                tgLogger.LogError(ex, "An error occured during Migration.\n" + ex.Message);
             }
             try
             {
@@ -50,6 +51,7 @@ namespace BudgetHistory.API
             catch (Exception ex)
             {
                 logger.LogError(ex, "An error occured during data seeding.\n" + ex.Message);
+                tgLogger.LogError(ex, "An error occured during data seeding.\n" + ex.Message);
             }
 
             builder.Run();

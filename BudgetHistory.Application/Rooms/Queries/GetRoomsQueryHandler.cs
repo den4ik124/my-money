@@ -23,11 +23,11 @@ namespace BudgetHistory.Application.Rooms.Queries
             this.mapper = mapper;
         }
 
-        public async Task<Result<IEnumerable<RoomResponseDto>>> Handle(GetRoomsQuery request, CancellationToken cancellationToken)
+        public Task<Result<IEnumerable<RoomResponseDto>>> Handle(GetRoomsQuery request, CancellationToken cancellationToken)
         {
             var rooms = this.unitOfWork.GetGenericRepository<Room>().GetQuery(r => r.Users.Select(u => u.AssociatedIdentityUserId).Contains(request.UserId)).AsEnumerable();
             var roomsDto = mapper.Map<IEnumerable<RoomResponseDto>>(rooms);
-            return Result<IEnumerable<RoomResponseDto>>.Success(roomsDto);
+            return Task.FromResult(Result<IEnumerable<RoomResponseDto>>.Success(roomsDto));
         }
     }
 }

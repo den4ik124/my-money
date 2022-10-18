@@ -13,6 +13,7 @@
   <ItemGroup>
     <ProjectReference Include="..\BudgetHistory.Core\BudgetHistory.Core.csproj" />
     <ProjectReference Include="..\BudgetHistory.Data\BudgetHistory.Data.csproj" />
+    <ProjectReference Include="..\BudgetHistory.Logging\BudgetHistory.Logging.csproj" />
   </ItemGroup>
 
 </Project>

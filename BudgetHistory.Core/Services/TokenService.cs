@@ -1,19 +1,21 @@
 ﻿using BudgetHistory.Core.AppSettings;
 using BudgetHistory.Core.Constants;
 using BudgetHistory.Core.Models;
+using BudgetHistory.Core.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace BudgetHistory.Core.Services
 {
-    public class TokenService
+    public class TokenService : ITokenService
     {
         private readonly UserManager<IdentityUser> userManager;
         private readonly AuthTokenParameters authTokenParameters;
@@ -36,7 +38,7 @@ namespace BudgetHistory.Core.Services
             {
                 claims.Add(new Claim(ClaimTypes.Role, role));
             }
-            PrepareTokenData(claims, out JwtSecurityTokenHandler tokenHandler, out SecurityToken token);
+            PrepareTokenData(claims, out JwtSecurityTokenHandler tokenHandler, out SecurityToken token, authTokenParameters.TokenExpirationTimeInHours * 60);
 
             return tokenHandler.WriteToken(token);
         }
@@ -50,12 +52,19 @@ namespace BudgetHistory.Core.Services
                 new Claim(ClaimConstants.UserId, userId),
             };
 
-            PrepareTokenData(claims, out JwtSecurityTokenHandler tokenHandler, out SecurityToken token);
+            PrepareTokenData(claims, out JwtSecurityTokenHandler tokenHandler, out SecurityToken token, Cookies.RoomTokenExpirationInMinutes);
 
             return tokenHandler.WriteToken(token);
         }
 
-        private void PrepareTokenData(List<Claim> claims, out JwtSecurityTokenHandler tokenHandler, out SecurityToken token)
+        public IEnumerable<Claim> DecodeToken(string authToken)
+        {
+            var jwtToken = authToken.Split(" ").Last();
+            var handler = new JwtSecurityTokenHandler();
+            return handler.ReadJwtToken(jwtToken).Claims;
+        }
+
+        private void PrepareTokenData(List<Claim> claims, out JwtSecurityTokenHandler tokenHandler, out SecurityToken token, int expirationTimeInMinutes)
         {
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(authTokenParameters.SigningKey));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
@@ -63,7 +72,7 @@ namespace BudgetHistory.Core.Services
             var tokenDescriptor = new SecurityTokenDescriptor()
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.Now.AddMinutes(60),
+                Expires = DateTime.Now.AddMinutes(expirationTimeInMinutes),
                 SigningCredentials = credentials,
                 Issuer = this.authTokenParameters.Issuer,
                 Audience = this.authTokenParameters.Audience,

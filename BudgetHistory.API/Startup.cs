@@ -1,5 +1,6 @@
 using BudgetHistory.API.Extensions;
 using BudgetHistory.API.Middleware;
+using BudgetHistory.Logging;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -23,6 +24,8 @@ namespace BudgetHistory.API
         {
             services.AddNotesServices(Configuration);
             services.AddIdentityServices(Configuration);
+
+            services.AddSingleton<BudgetHistory.Logging.Interfaces.ITgLogger, TelegramLogger>();
 
             services.AddAutoMapper(typeof(Startup));
 
