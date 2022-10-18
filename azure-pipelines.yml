@@ -21,23 +21,45 @@ jobs:
   steps:
   - checkout: self
 
-  - task: FileTransform@1
-    displayName: "Variables substitution"
-    inputs:
-      folderPath: '$(System.DefaultWorkingDirectory)/**/*.zip'
-      fileType: 'json'
-      targetFiles: '**/appsettings.json'
+
+
+  # - task: FileTransform@1
+  #   displayName: "Variables substitution"
+  #   inputs:
+  #     folderPath: '$(System.DefaultWorkingDirectory)/**/*.zip' 
+  #     fileType: 'json'
+  #     targetFiles: '**/appsettings.json'
 
   - task: DotNetCoreCLI@2
     displayName: Restore
     inputs:
       command: restore
       projects: $(BuildParameters.RestoreBuildProjects)
+      
+
+
   - task: DotNetCoreCLI@2
     displayName: Build
     inputs:
       projects: $(BuildParameters.RestoreBuildProjects)
       arguments: --configuration $(BuildConfiguration)
+      
+  # - task: replacetokens@5
+  #   inputs:
+  #     rootDirectory: '$(Pipeline.Workspace)/BudgetHistory'
+  #     targetFiles: '**/appsettings.json'
+  #     encoding: 'auto'
+  #     tokenPattern: 'default'
+  #     writeBOM: false
+  #     escapeType: 'none'
+  #     actionOnMissing: 'warn'
+  #     keepToken: false
+  #     actionOnNoFiles: 'continue'
+  #     enableTransforms: false
+  #     enableRecursion: false
+  #     useLegacyPattern: false
+  #     enableTelemetry: false
+
   - task: DotNetCoreCLI@2
     displayName: Test
     inputs:
