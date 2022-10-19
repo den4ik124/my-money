@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using BudgetHistory.Application.Core;
-using BudgetHistory.Core.Interfaces.Repositories;
 using BudgetHistory.Core.Models;
 using BudgetHistory.Core.Services.Interfaces;
 using MediatR;
@@ -12,13 +11,11 @@ namespace BudgetHistory.Application.Notes.Commands
     public class EditNoteCommandHandler : IRequestHandler<EditNoteCommand, Result<string>>
     {
         private readonly INoteService noteService;
-        private readonly IUnitOfWork unitOfWork;
         private readonly IMapper mapper;
 
-        public EditNoteCommandHandler(INoteService noteService, IUnitOfWork unitOfWork, IMapper mapper)
+        public EditNoteCommandHandler(INoteService noteService, IMapper mapper)
         {
             this.noteService = noteService;
-            this.unitOfWork = unitOfWork;
             this.mapper = mapper;
         }
 

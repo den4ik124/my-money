@@ -1,6 +1,7 @@
 using BudgetHistory.Application.DTOs.Note;
 using BudgetHistory.Application.Notes.Commands;
 using BudgetHistory.Core.Models;
+using BudgetHistory.Core.Services;
 using Moq;
 using Shouldly;
 using System;
@@ -36,9 +37,11 @@ namespace BudgetHistory.Tests.HandlersTests.Notes
             genRepoMock.Setup(rep => rep.Update(It.IsAny<Note>())).Returns((Note updatedItem) =>
             {
                 var item = items.FirstOrDefault();
-                item = updatedItem;
+                //item = updatedItem;
+                Mapper.Map(updatedItem, item);
                 return true;
             });
+            genRepoMock.Setup(rep => rep.GetById(It.IsAny<Guid>())).ReturnsAsync(items.FirstOrDefault());
 
             UnitOfWorkMock.Setup(x => x.GetGenericRepository<Note>()).Returns(genRepoMock.Object);
             var editedNote = genRepoMock.Object.GetQuery().FirstOrDefault();
@@ -50,8 +53,10 @@ namespace BudgetHistory.Tests.HandlersTests.Notes
             editedNoteDto.UserId = checkString;
             editedNoteDto.RoomId = checkString;
 
+            var noteService = new NoteService(UnitOfWorkMock.Object, Mapper);
+
             //Arrange
-            var handler = new EditNoteCommandHandler(UnitOfWorkMock.Object, Mapper);
+            var handler = new EditNoteCommandHandler(noteService, Mapper);
 
             var request = new EditNoteCommand()
             {
@@ -60,12 +65,12 @@ namespace BudgetHistory.Tests.HandlersTests.Notes
 
             //Act
             var result = await handler.Handle(request, CancellationToken.None);
-            var changedNote = genRepoMock.Object.GetQuery().FirstOrDefault();
 
             //Assert
+            var firstItem = items.FirstOrDefault();
             result.IsSuccess.ShouldBeTrue();
-            changedNote.UserId.ShouldBe(checkString);
-            changedNote.RoomId.ShouldBe(checkString);
+            firstItem.UserId.ShouldBe(checkString);
+            firstItem.RoomId.ShouldBe(checkString);
         }
     }
 }

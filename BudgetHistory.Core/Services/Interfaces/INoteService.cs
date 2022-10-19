@@ -6,7 +6,7 @@ namespace BudgetHistory.Core.Services.Interfaces
 {
     public interface INoteService
     {
-        Task<bool> CreateNewNote(Note newNote, Currency currency, decimal value, Guid roomId);
+        Task<bool> CreateNewNote(Note newNote, Currency currency, decimal value, Guid roomId, string roomPassword);
 
         Task<bool> UpdateNote(Note updatedNote);
 

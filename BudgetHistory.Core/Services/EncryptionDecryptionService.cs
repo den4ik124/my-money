@@ -47,7 +47,7 @@ namespace BudgetHistory.Core.Services
             using var cryptoStream = new CryptoStream(memoryStream, decryptor, CryptoStreamMode.Read);
             using var streamReader = new StreamReader(cryptoStream);
 
-            return streamReader.ReadToEnd().Replace("\r\n", String.Empty);
+            return streamReader.ReadToEnd().Replace("\r\n", string.Empty);
         }
 
         private static byte[] CheckPasswordLength(string secretKey)

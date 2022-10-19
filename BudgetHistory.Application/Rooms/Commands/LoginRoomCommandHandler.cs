@@ -47,8 +47,8 @@ namespace BudgetHistory.Application.Rooms.Commands
                 var errorMessage = $"Room \'{request.LoginRoomDto.RoomId}\' does not exist.";
                 return Result<string>.Failure(errorMessage);
             }
-            var encryptedPassword = encryptionDecryptionService.Decrypt(room.Password, config.GetSection("SecretKey").Value);
-            if (!encryptedPassword.Equals(request.LoginRoomDto.RoomPassword))
+            var decryptedPassword = encryptionDecryptionService.Decrypt(room.Password, config.GetSection(AppSettings.SecretKey).Value);
+            if (!decryptedPassword.Equals(request.LoginRoomDto.RoomPassword))
             {
                 var errorMessage = $"Wrong room password!";
                 //TODO: Add attempts handler/counter

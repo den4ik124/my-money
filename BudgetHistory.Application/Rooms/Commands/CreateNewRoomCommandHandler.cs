@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using BudgetHistory.Application.Core;
+using BudgetHistory.Core.Constants;
 using BudgetHistory.Core.Interfaces;
 using BudgetHistory.Core.Interfaces.Repositories;
 using BudgetHistory.Core.Models;
@@ -33,7 +34,7 @@ namespace BudgetHistory.Application.Rooms.Commands
         {
             request.NewRoomDto.Id = Guid.NewGuid();
             request.NewRoomDto.DateOfCreation = DateTime.UtcNow;
-            request.NewRoomDto.Password = encryptionDecryptionService.Encrypt(request.NewRoomDto.Password, config.GetSection("SecretKey").Value);
+            request.NewRoomDto.Password = encryptionDecryptionService.Encrypt(request.NewRoomDto.Password, config.GetSection(AppSettings.SecretKey).Value);
 
             var room = mapper.Map<Room>(request.NewRoomDto);
 

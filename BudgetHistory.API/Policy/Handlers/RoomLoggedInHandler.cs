@@ -28,6 +28,9 @@ namespace BudgetHistory.API.Policy.Handlers
         {
             var token = this.httpContext.HttpContext.Request.Headers[Headers.RoomAuthorization];
 
+            if (!token.Any())
+                return Task.CompletedTask;
+
             var claims = jwtTokenService.DecodeToken(token);
 
             var roomId = claims.FirstOrDefault(c => c.Type == ClaimConstants.RoomId).Value;
