@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using BudgetHistory.Core.Extensions;
 using BudgetHistory.Core.Interfaces;
 using BudgetHistory.Core.Interfaces.Repositories;
 using BudgetHistory.Core.Models;
@@ -37,8 +38,7 @@ namespace BudgetHistory.Core.Services
                                      .OrderBy(x => x.DateOfCreation).LastOrDefault();
             if (lastNote is not null)
             {
-                lastNote.Value = decimal.Parse(encryptionDecryptionService.Decrypt(lastNote.EncryptedValue.ToString(), roomPassword));
-                lastNote.Balance = decimal.Parse(encryptionDecryptionService.Decrypt(lastNote.EncryptedBalance.ToString(), roomPassword));
+                lastNote.DecryptValues(encryptionDecryptionService, roomPassword);
                 newNote.Balance = lastNote.Balance + value;
             }
             else
@@ -47,9 +47,7 @@ namespace BudgetHistory.Core.Services
             }
 
             newNote.Id = Guid.NewGuid();
-
-            newNote.EncryptedValue = encryptionDecryptionService.Encrypt(newNote.Value.ToString(), roomPassword);
-            newNote.EncryptedBalance = encryptionDecryptionService.Encrypt(newNote.Balance.ToString(), roomPassword);
+            newNote.EncryptValues(encryptionDecryptionService, roomPassword);
 
             if (await noteRepository.Add(newNote))
             {
@@ -92,9 +90,9 @@ namespace BudgetHistory.Core.Services
             var room = await roomRepository.GetById(updatedNote.RoomId);
             var decryptedPassword = encryptionDecryptionService.Decrypt(room.Password, configuration.GetSection(Constants.AppSettings.SecretKey).Value);
 
-            oldNote.Value = decimal.Parse(encryptionDecryptionService.Decrypt(oldNote.EncryptedValue, decryptedPassword));
-            updatedNote.EncryptedValue = encryptionDecryptionService.Encrypt(updatedNote.Value.ToString(), decryptedPassword);
-            updatedNote.EncryptedBalance = encryptionDecryptionService.Encrypt(oldNote.Balance.ToString(), decryptedPassword);
+            oldNote.DecryptValues(encryptionDecryptionService, decryptedPassword);
+            updatedNote.EncryptValues(encryptionDecryptionService, decryptedPassword);
+
             updatedNote.DateOfModification = DateTime.UtcNow;
 
             if (oldNote.Value == updatedNote.Value
@@ -108,8 +106,6 @@ namespace BudgetHistory.Core.Services
                 return true;
             }
 
-            this.mapper.Map(updatedNote, oldNote);
-
             var notesToEdit = GetNotesWithUpdatedBalances(oldNote, updatedNote, decryptedPassword);
 
             if (!notesToEdit.Any())
@@ -117,6 +113,7 @@ namespace BudgetHistory.Core.Services
                 this.unitOfWork.RollbackTransaction();
                 return false;
             }
+
             foreach (var note in notesToEdit)
             {
                 noteRepository.Update(note);
@@ -130,128 +127,87 @@ namespace BudgetHistory.Core.Services
         {
             if (oldNote.Currency == updatedNote.Currency)
             {
-                var currencyGroup = noteRepository.GetQuery(note => note.RoomId == updatedNote.RoomId).GroupBy(note => note.Currency).FirstOrDefault(group => group.Key == oldNote.Currency).OrderBy(x => x.DateOfCreation).ToList();
-                var noteIndex = currencyGroup.FindIndex(note => note.Id == updatedNote.Id);
-                if (noteIndex < 0)
-                {
-                    return new List<Note>();
-                }
-                var notesToEdit = currencyGroup.Skip(noteIndex - 1).ToList();
+                this.mapper.Map(updatedNote, oldNote);
+                var notesToUpdate = noteRepository.GetQuery(note => note.RoomId == updatedNote.RoomId && note.DateOfCreation >= oldNote.DateOfCreation && note.Currency == oldNote.Currency).ToList();
 
-                foreach (var note in notesToEdit)
+                foreach (var item in notesToUpdate)
                 {
-                    note.Value = decimal.Parse(encryptionDecryptionService.Decrypt(note.EncryptedValue, roomPassword));
-                    note.Balance = decimal.Parse(encryptionDecryptionService.Decrypt(note.EncryptedBalance, roomPassword));
+                    item.DecryptValues(encryptionDecryptionService, roomPassword);
                 }
 
-                if (notesToEdit.Count == 0)
+                var groupInitialBalance = oldNote.Balance - oldNote.Value < 0 ? 0 : oldNote.Balance - oldNote.Value;
+
+                return RecalculateBalances(notesToUpdate, groupInitialBalance, roomPassword);
+            }
+
+            var currencyGroups = noteRepository.GetQuery(note => note.RoomId == updatedNote.RoomId
+                                                              && note.DateOfCreation >= oldNote.DateOfCreation
+                                                              && !note.IsDeleted)
+                                               .AsEnumerable()
+                                               .GroupBy(note => note.Currency);
+
+            foreach (var currencyGroup in currencyGroups)
+            {
+                foreach (var item in currencyGroup)
                 {
-                    return notesToEdit;
+                    item.DecryptValues(encryptionDecryptionService, roomPassword);
                 }
+            }
 
-                var index = 0;
+            var oldCurrencyGroup = currencyGroups.FirstOrDefault(group => group.Key == oldNote.Currency)
+                                                 .OrderBy(x => x.DateOfCreation)
+                                                 .ToList();
 
-                if (updatedNote.IsDeleted)
+            updatedNote.DateOfCreation = oldNote.DateOfCreation;
+
+            var newCurrencyGroup = new List<Note>();
+            var newGroupInitialBalance = 0m;
+
+            if (currencyGroups.Any(group => group.Key == updatedNote.Currency))
+            {
+                newCurrencyGroup = currencyGroups.FirstOrDefault(group => group.Key == updatedNote.Currency)
+                                                 .OrderBy(x => x.DateOfCreation)
+                                                 .ToList();
+                var newGroupFirstElement = newCurrencyGroup.FirstOrDefault(); //получили первый элемент новой коллекции
+                newGroupInitialBalance = newGroupFirstElement.Balance - newGroupFirstElement.Value; //запомнили -1 баланс
+            }
+
+            this.mapper.Map(updatedNote, oldNote);
+
+            newCurrencyGroup.Insert(0, oldNote);
+
+            //TODO : Пересчитать баланс новых записей
+            newCurrencyGroup = RecalculateBalances(newCurrencyGroup, newGroupInitialBalance, roomPassword);
+
+            var oldGroupFirstElement = oldCurrencyGroup.FirstOrDefault(); //получили первый элемент новой коллекции
+            var oldGroupInitialBalance = oldGroupFirstElement is null ? 0 : oldGroupFirstElement.Balance - oldGroupFirstElement.Value; //запомнили -1 баланс
+
+            oldCurrencyGroup.Remove(oldNote);
+
+            //TODO : Пересчитать баланс старых записей
+            oldCurrencyGroup = RecalculateBalances(oldCurrencyGroup.ToList(), oldGroupInitialBalance, roomPassword);
+
+            var concatedList = oldCurrencyGroup.Concat(newCurrencyGroup);
+
+            return concatedList;
+        }
+
+        private List<Note> RecalculateBalances(List<Note> notes, decimal initialBalance, string roomPassword)
+        {
+            for (int i = 0; i < notes.Count; i++)
+            {
+                if (i == 0)
                 {
-                    index = noteIndex;
-                    notesToEdit.RemoveAt(noteIndex);
+                    notes[i].Balance = initialBalance + notes[i].Value;
                 }
                 else
                 {
-                    index = notesToEdit.FindIndex(note => note.Id == updatedNote.Id);
-
-                    notesToEdit[index].Value = updatedNote.Value;
-                    notesToEdit[index].Balance = notesToEdit[0].Balance + updatedNote.Value;
-                    notesToEdit[index].DateOfModification = DateTime.UtcNow;
+                    notes[i].Balance = notes[i - 1].Balance + notes[i].Value;
                 }
-
-                for (int i = index; i < notesToEdit.Count; i++)
-                {
-                    if (i == 0)
-                    {
-                        notesToEdit[i].Balance = notesToEdit[i].Value;
-                        continue;
-                    }
-                    notesToEdit[i].Balance = notesToEdit[i - 1].Balance + notesToEdit[i].Value;
-                }
-
-                foreach (var note in notesToEdit)
-                {
-                    note.EncryptedValue = encryptionDecryptionService.Encrypt(note.Value.ToString(), roomPassword);
-                    note.EncryptedBalance = encryptionDecryptionService.Encrypt(note.Balance.ToString(), roomPassword);
-                }
-                return notesToEdit;
+                notes[i].EncryptValues(encryptionDecryptionService, roomPassword);
             }
 
-            var currencyGroups = noteRepository.GetQuery(note => note.RoomId == updatedNote.RoomId).GroupBy(note => note.Currency);
-
-            var oldCurrencyGroup = currencyGroups.FirstOrDefault(group => group.Key == oldNote.Currency).OrderBy(x => x.DateOfCreation).ToList();
-            var newCurrencyGroup = currencyGroups.FirstOrDefault(group => group.Key == updatedNote.Currency).OrderBy(x => x.DateOfCreation).ToList();
-
-            var oldNoteDateOfCreation = oldNote.DateOfCreation;
-            oldCurrencyGroup.Remove(oldNote);
-
-            //Пересчитать баланс старых записей
-
-            updatedNote.DateOfCreation = oldNoteDateOfCreation;
-
-            newCurrencyGroup.Add(updatedNote);
-
-            //Пересчитать баланс новых записей
-
-            return oldCurrencyGroup.Concat(newCurrencyGroup);
-            //var orderedNotes = noteRepository.GetQuery(note => note.RoomId == updatedNote.RoomId).GroupBy(note => note.Currency)
-            //                             .OrderBy(x => x.DateOfCreation).ToList();
-            //var noteIndex = orderedNotes.FindIndex(note => note.Id == updatedNote.Id);
-            //if (noteIndex < 0)
-            //{
-            //    return new List<Note>();
-            //}
-            //var notesToEdit = orderedNotes.Skip(noteIndex - 1).ToList();
-
-            //foreach (var note in notesToEdit)
-            //{
-            //    note.Value = decimal.Parse(encryptionDecryptionService.Decrypt(note.EncryptedValue, roomPassword));
-            //    note.Balance = decimal.Parse(encryptionDecryptionService.Decrypt(note.EncryptedBalance, roomPassword));
-            //}
-
-            //if (notesToEdit.Count == 0)
-            //{
-            //    return notesToEdit;
-            //}
-
-            //var index = 0;
-
-            //if (updatedNote.IsDeleted)
-            //{
-            //    index = noteIndex;
-            //    notesToEdit.RemoveAt(noteIndex);
-            //}
-            //else
-            //{
-            //    index = notesToEdit.FindIndex(note => note.Id == updatedNote.Id);
-
-            //    notesToEdit[index].Value = updatedNote.Value;
-            //    notesToEdit[index].Balance = notesToEdit[0].Balance + updatedNote.Value;
-            //    notesToEdit[index].DateOfModification = DateTime.UtcNow;
-            //}
-
-            //for (int i = index; i < notesToEdit.Count; i++)
-            //{
-            //    if (i == 0)
-            //    {
-            //        notesToEdit[i].Balance = notesToEdit[i].Value;
-            //        continue;
-            //    }
-            //    notesToEdit[i].Balance = notesToEdit[i - 1].Balance + notesToEdit[i].Value;
-            //}
-
-            //foreach (var note in notesToEdit)
-            //{
-            //    note.EncryptedValue = encryptionDecryptionService.Encrypt(note.Value.ToString(), roomPassword);
-            //    note.EncryptedBalance = encryptionDecryptionService.Encrypt(note.Balance.ToString(), roomPassword);
-            //}
-            //return notesToEdit;
+            return notes;
         }
     }
 }

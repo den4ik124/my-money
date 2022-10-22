@@ -2,6 +2,7 @@
 using BudgetHistory.Application.Core;
 using BudgetHistory.Application.DTOs.Note;
 using BudgetHistory.Core.Constants;
+using BudgetHistory.Core.Extensions;
 using BudgetHistory.Core.Interfaces;
 using BudgetHistory.Core.Interfaces.Repositories;
 using BudgetHistory.Core.Models;
@@ -42,8 +43,10 @@ namespace BudgetHistory.Application.Notes.Queries
 
             foreach (var note in notes)
             {
-                note.Value = decimal.Parse(encryptionDecryptionService.Decrypt(note.EncryptedValue, decryptedPassword));
-                note.Balance = decimal.Parse(encryptionDecryptionService.Decrypt(note.EncryptedBalance, decryptedPassword));
+                note.DecryptValues(encryptionDecryptionService, decryptedPassword);
+
+                //note.Value = encryptionDecryptionService.DecryptToDecimal(note.EncryptedValue, decryptedPassword);
+                //note.Balance = encryptionDecryptionService.DecryptToDecimal(note.EncryptedBalance, decryptedPassword);
             }
 
             var response = this.mapper.Map<IEnumerable<NoteDto>>(notes);

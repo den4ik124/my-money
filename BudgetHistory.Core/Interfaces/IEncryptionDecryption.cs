@@ -2,8 +2,10 @@
 {
     public interface IEncryptionDecryption
     {
-        string Encrypt(string data, string secretKey);
+        string Encrypt<T>(T data, string secretKey);
 
         string Decrypt(string encryptedData, string secretKey);
+
+        public decimal DecryptToDecimal(string encryptedDecimal, string secretKey);
     }
 }
