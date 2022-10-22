@@ -1,7 +1,10 @@
 ﻿using AutoMapper;
+using BudgetHistory.Core.Extensions;
+using BudgetHistory.Core.Interfaces;
 using BudgetHistory.Core.Interfaces.Repositories;
 using BudgetHistory.Core.Models;
 using BudgetHistory.Core.Services.Interfaces;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,24 +16,40 @@ namespace BudgetHistory.Core.Services
     {
         private readonly IUnitOfWork unitOfWork;
         private readonly IMapper mapper;
+        private readonly IEncryptionDecryption encryptionDecryptionService;
+        private readonly IConfiguration configuration;
+        private readonly IGenericRepository<Note> noteRepository;
+        private readonly IGenericRepository<Room> roomRepository;
 
-        public NoteService(IUnitOfWork unitOfWork, IMapper mapper)
+        public NoteService(IUnitOfWork unitOfWork, IMapper mapper, IEncryptionDecryption encryptionDecryption, IConfiguration configuration)
         {
             this.unitOfWork = unitOfWork;
             this.mapper = mapper;
+            this.encryptionDecryptionService = encryptionDecryption;
+            this.configuration = configuration;
+            this.noteRepository = unitOfWork.GetGenericRepository<Note>();
+            this.roomRepository = unitOfWork.GetGenericRepository<Room>();
         }
 
-        public async Task<bool> CreateNewNote(Note newNote, Currency currency, decimal value, Guid roomId)
+        public async Task<bool> CreateNewNote(Note newNote, Currency currency, decimal value, Guid roomId, string roomPassword)
         {
-            var repo = this.unitOfWork.GetGenericRepository<Note>();
-
-            var lastNote = repo.GetQuery(note => note.RoomId == roomId
+            var lastNote = noteRepository.GetQuery(note => note.RoomId == roomId
                                      && note.Currency == currency)?
                                      .OrderBy(x => x.DateOfCreation).LastOrDefault();
+            if (lastNote is not null)
+            {
+                lastNote.DecryptValues(encryptionDecryptionService, roomPassword);
+                newNote.Balance = lastNote.Balance + value;
+            }
+            else
+            {
+                newNote.Balance = value;
+            }
 
-            newNote.Balance = lastNote is null ? value : lastNote.Balance + value;
             newNote.Id = Guid.NewGuid();
-            if (await repo.Add(newNote))
+            newNote.EncryptValues(encryptionDecryptionService, roomPassword);
+
+            if (await noteRepository.Add(newNote))
             {
                 await this.unitOfWork.CompleteAsync();
                 return true;
@@ -59,80 +78,136 @@ namespace BudgetHistory.Core.Services
 
         public async Task<bool> UpdateNote(Note updatedNote)
         {
-            //TODO : проверить лучше варианты с пересчетом значений в БД. 1) при изменении значений 2) при одинаковых значениях
+            //TODO : реализовать update с учетом шифрованя данных
             await this.unitOfWork.BeginTransactionAsync();
-            var repository = this.unitOfWork.GetGenericRepository<Note>();
-            var noteFromDb = await repository.GetById(updatedNote.Id);
-            if (noteFromDb is null)
+
+            var oldNote = await noteRepository.GetById(updatedNote.Id);
+            if (oldNote is null)
             {
                 return false;
             }
-            if (noteFromDb.Value == updatedNote.Value)
-            {
-                updatedNote.DateOfModification = DateTime.UtcNow;
 
-                this.mapper.Map(updatedNote, noteFromDb);
-                //TODO здесь должен быть пересчет, если IsDeleted
-                repository.Update(noteFromDb);
+            var room = await roomRepository.GetById(updatedNote.RoomId);
+            var decryptedPassword = encryptionDecryptionService.Decrypt(room.Password, configuration.GetSection(Constants.AppSettings.SecretKey).Value);
+
+            oldNote.DecryptValues(encryptionDecryptionService, decryptedPassword);
+            updatedNote.EncryptValues(encryptionDecryptionService, decryptedPassword);
+
+            updatedNote.DateOfModification = DateTime.UtcNow;
+
+            if (oldNote.Value == updatedNote.Value
+                && oldNote.IsDeleted == updatedNote.IsDeleted
+                && oldNote.Currency == updatedNote.Currency)
+            {
+                this.mapper.Map(updatedNote, oldNote);
+                noteRepository.Update(oldNote);
                 this.unitOfWork.TransactionCommit();
                 await this.unitOfWork.CompleteAsync();
                 return true;
             }
-            this.mapper.Map(updatedNote, noteFromDb); //TODO не нравится мне маппинг в этом месте
-            var notesToEdit = GetNotesWithUpdatedBalances(updatedNote, repository);
 
-            if (notesToEdit.Count == 0)
+            var notesToEdit = GetNotesWithUpdatedBalances(oldNote, updatedNote, decryptedPassword);
+
+            if (!notesToEdit.Any())
             {
                 this.unitOfWork.RollbackTransaction();
                 return false;
             }
+
             foreach (var note in notesToEdit)
             {
-                repository.Update(note);
+                noteRepository.Update(note);
             }
             this.unitOfWork.TransactionCommit();
             await this.unitOfWork.CompleteAsync();
             return true;
         }
 
-        private IList<T> GetNotesWithUpdatedBalances<T>(Note updatedNote, IGenericRepository<T> repository) where T : Note
+        private IEnumerable<Note> GetNotesWithUpdatedBalances(Note oldNote, Note updatedNote, string roomPassword)
         {
-            var orderedNotes = repository.GetQuery(note => note.RoomId == updatedNote.RoomId
-                                                       && note.Currency == updatedNote.Currency)
-                                         .OrderBy(x => x.DateOfCreation).ToList();
-            var noteIndex = orderedNotes.FindIndex(note => note.Id == updatedNote.Id);
-            if (noteIndex < 0)
+            if (oldNote.Currency == updatedNote.Currency)
             {
-                return new List<T>();
-            }
-            var notesToEdit = orderedNotes.Skip(noteIndex - 1).ToList();
+                this.mapper.Map(updatedNote, oldNote);
+                var notesToUpdate = noteRepository.GetQuery(note => note.RoomId == updatedNote.RoomId && note.DateOfCreation >= oldNote.DateOfCreation && note.Currency == oldNote.Currency).ToList();
 
-            if (notesToEdit.Count == 0)
-            {
-                return notesToEdit;
-            }
+                foreach (var item in notesToUpdate)
+                {
+                    item.DecryptValues(encryptionDecryptionService, roomPassword);
+                }
 
-            var index = 0;
+                var groupInitialBalance = oldNote.Balance - oldNote.Value < 0 ? 0 : oldNote.Balance - oldNote.Value;
 
-            if (updatedNote.IsDeleted)
-            {
-                index = noteIndex;
-                notesToEdit.RemoveAt(noteIndex);
-            }
-            else
-            {
-                index = notesToEdit.FindIndex(note => note.Id == updatedNote.Id);
-
-                notesToEdit[index].Value = updatedNote.Value;
-                notesToEdit[index].Balance = notesToEdit[0].Balance + updatedNote.Value;
-                notesToEdit[index].DateOfModification = DateTime.UtcNow;
+                return RecalculateBalances(notesToUpdate, groupInitialBalance, roomPassword);
             }
 
-            for (int i = index; i < notesToEdit.Count; i++)
+            var currencyGroups = noteRepository.GetQuery(note => note.RoomId == updatedNote.RoomId
+                                                              && note.DateOfCreation >= oldNote.DateOfCreation
+                                                              && !note.IsDeleted)
+                                               .AsEnumerable()
+                                               .GroupBy(note => note.Currency);
+
+            foreach (var currencyGroup in currencyGroups)
             {
-                notesToEdit[i].Balance = notesToEdit[i - 1].Balance + notesToEdit[i].Value;
+                foreach (var item in currencyGroup)
+                {
+                    item.DecryptValues(encryptionDecryptionService, roomPassword);
+                }
             }
-            return notesToEdit;
+
+            var oldCurrencyGroup = currencyGroups.FirstOrDefault(group => group.Key == oldNote.Currency)
+                                                 .OrderBy(x => x.DateOfCreation)
+                                                 .ToList();
+
+            updatedNote.DateOfCreation = oldNote.DateOfCreation;
+
+            var newCurrencyGroup = new List<Note>();
+            var newGroupInitialBalance = 0m;
+
+            if (currencyGroups.Any(group => group.Key == updatedNote.Currency))
+            {
+                newCurrencyGroup = currencyGroups.FirstOrDefault(group => group.Key == updatedNote.Currency)
+                                                 .OrderBy(x => x.DateOfCreation)
+                                                 .ToList();
+                var newGroupFirstElement = newCurrencyGroup.FirstOrDefault(); //получили первый элемент новой коллекции
+                newGroupInitialBalance = newGroupFirstElement.Balance - newGroupFirstElement.Value; //запомнили -1 баланс
+            }
+
+            this.mapper.Map(updatedNote, oldNote);
+
+            newCurrencyGroup.Insert(0, oldNote);
+
+            //TODO : Пересчитать баланс новых записей
+            newCurrencyGroup = RecalculateBalances(newCurrencyGroup, newGroupInitialBalance, roomPassword);
+
+            var oldGroupFirstElement = oldCurrencyGroup.FirstOrDefault(); //получили первый элемент новой коллекции
+            var oldGroupInitialBalance = oldGroupFirstElement is null ? 0 : oldGroupFirstElement.Balance - oldGroupFirstElement.Value; //запомнили -1 баланс
+
+            oldCurrencyGroup.Remove(oldNote);
+
+            //TODO : Пересчитать баланс старых записей
+            oldCurrencyGroup = RecalculateBalances(oldCurrencyGroup.ToList(), oldGroupInitialBalance, roomPassword);
+
+            var concatedList = oldCurrencyGroup.Concat(newCurrencyGroup);
+
+            return concatedList;
+        }
+
+        private List<Note> RecalculateBalances(List<Note> notes, decimal initialBalance, string roomPassword)
+        {
+            for (int i = 0; i < notes.Count; i++)
+            {
+                if (i == 0)
+                {
+                    notes[i].Balance = initialBalance + notes[i].Value;
+                }
+                else
+                {
+                    notes[i].Balance = notes[i - 1].Balance + notes[i].Value;
+                }
+                notes[i].EncryptValues(encryptionDecryptionService, roomPassword);
+            }
+
+            return notes;
         }
     }
 }

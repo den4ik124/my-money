@@ -8,7 +8,7 @@ namespace BudgetHistory.Core.Services
 {
     public class EncryptionDecryptionService : IEncryptionDecryption
     {
-        public string Encrypt(string data, string secretKey)
+        public string Encrypt<T>(T data, string secretKey)
         {
             byte[] keyBytes = CheckPasswordLength(secretKey);
 
@@ -17,17 +17,13 @@ namespace BudgetHistory.Core.Services
             {
                 aes.Key = keyBytes;
                 aes.IV = iv;
-                using (var memoryStream = new MemoryStream())
+                using var memoryStream = new MemoryStream();
+                using (var cryptoStream = new CryptoStream(memoryStream, aes.CreateEncryptor(aes.Key, aes.IV), CryptoStreamMode.Write))
                 {
-                    using (var cryptoStream = new CryptoStream(memoryStream, aes.CreateEncryptor(aes.Key, aes.IV), CryptoStreamMode.Write))
-                    {
-                        using (var streamWriter = new StreamWriter(cryptoStream))
-                        {
-                            streamWriter.WriteLine(data);
-                        }
-                    }
-                    return Convert.ToBase64String(memoryStream.ToArray());
+                    using var streamWriter = new StreamWriter(cryptoStream);
+                    streamWriter.WriteLine(data.ToString());
                 }
+                return Convert.ToBase64String(memoryStream.ToArray());
             }
         }
 
@@ -47,7 +43,12 @@ namespace BudgetHistory.Core.Services
             using var cryptoStream = new CryptoStream(memoryStream, decryptor, CryptoStreamMode.Read);
             using var streamReader = new StreamReader(cryptoStream);
 
-            return streamReader.ReadToEnd().Replace("\r\n", String.Empty);
+            return streamReader.ReadToEnd().Replace("\r\n", string.Empty);
+        }
+
+        public decimal DecryptToDecimal(string encryptedDecimal, string secretKey)
+        {
+            return decimal.Parse(Decrypt(encryptedDecimal, secretKey));
         }
 
         private static byte[] CheckPasswordLength(string secretKey)

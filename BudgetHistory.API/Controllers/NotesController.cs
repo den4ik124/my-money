@@ -1,5 +1,4 @@
-﻿using BudgetHistory.Application.DTOs.Common;
-using BudgetHistory.Application.DTOs.Note;
+﻿using BudgetHistory.Application.DTOs.Note;
 using BudgetHistory.Application.Notes.Commands;
 using BudgetHistory.Application.Notes.Queries;
 using BudgetHistory.Core.Constants;
@@ -14,9 +13,9 @@ namespace BudgetHistory.API.Controllers
     public class NotesController : BaseApiController
     {
         [HttpPost("notes")]
-        public async Task<IActionResult> GetNotes([FromBody] PagingFilteringDto filteringData)
+        public async Task<IActionResult> GetNotes([FromBody] GetNotesRequestDto request /*PagingFilteringDto filteringData*/)
         {
-            return HandleResult(await this.Mediator.Send(new GetNotesQuery() { PageParameters = filteringData.PageInfo }));
+            return HandleResult(await this.Mediator.Send(new GetNotesQuery() { RoomId = new Guid(request.RoomId), PageParameters = request.PageInfo }));
         }
 
         [HttpGet("{id}")]

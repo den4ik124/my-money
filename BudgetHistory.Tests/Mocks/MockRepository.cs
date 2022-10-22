@@ -30,6 +30,30 @@ namespace BudgetHistory.Tests.Mocks
             return RepositoryCreation(items);
         }
 
+        public static Mock<IGenericRepository<Room>> GetMockedRoomRepository()
+        {
+            var password = "pa$$word123";
+            var items = new List<Room>()
+            {
+                new Room()
+                {
+                    Id = Guid.NewGuid(),
+                    Password = password
+                },
+                new Room()
+                {
+                    Id = Guid.NewGuid(),
+                    Password = password
+                },
+                new Room()
+                {
+                    Id = Guid.NewGuid(),
+                    Password = password
+                },
+            };
+            return RepositoryCreation(items);
+        }
+
         private static Mock<IGenericRepository<T>> RepositoryCreation<T>(ICollection<T> items) where T : class
         {
             var mockRepo = new Mock<IGenericRepository<T>>();
