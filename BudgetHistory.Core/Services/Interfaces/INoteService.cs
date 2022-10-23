@@ -10,13 +10,15 @@ namespace BudgetHistory.Core.Services.Interfaces
 {
     public interface INoteService
     {
+        Task<ServiceResponse<Note>> GetNoteById(Guid noteId);
+
         Task<IEnumerable<Note>> GetAllNotes(Guid roomId, int pageNumber, int pageSize, Expression<Func<Note, bool>> predicate = null,
                                                     Func<IQueryable<Note>, IOrderedQueryable<Note>> orderBy = null);
 
-        Task<NoteServiceResponse> CreateNewNote(Note newNote, Currency currency, decimal value, Guid roomId, string roomPassword);
+        Task<ServiceResponse> CreateNewNote(Note newNote, Currency currency, decimal value);
 
-        Task<NoteServiceResponse> UpdateNote(Note updatedNote);
+        Task<ServiceResponse> UpdateNote(Note updatedNote);
 
-        Task<NoteServiceResponse> DeleteNote(Guid noteId);
+        Task<ServiceResponse> DeleteNote(Guid noteId);
     }
 }

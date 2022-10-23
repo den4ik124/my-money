@@ -1,8 +1,8 @@
 using BudgetHistory.Application.DTOs.Note;
 using BudgetHistory.Application.Notes.Commands;
 using BudgetHistory.Core.Constants;
+using BudgetHistory.Core.Extensions;
 using BudgetHistory.Core.Models;
-using BudgetHistory.Core.Services;
 using Moq;
 using Shouldly;
 using System;
@@ -17,25 +17,18 @@ namespace BudgetHistory.Tests.HandlersTests.Notes
         [Fact]
         public async void CreateNoteCommandHandler_ShouldIncrease_NotesCount()
         {
-            var genNoteRepoMock = Mocks.MockRepository.GetMockedNoteRepository();
-            var genRoomRepoMock = Mocks.MockRepository.GetMockedRoomRepository();
-
-            UnitOfWorkMock.Setup(x => x.GetGenericRepository<Note>()).Returns(genNoteRepoMock.Object);
-            UnitOfWorkMock.Setup(x => x.GetGenericRepository<Room>()).Returns(genRoomRepoMock.Object);
-            genRoomRepoMock.Setup(x => x.GetById(It.IsAny<Guid>())).ReturnsAsync((Guid id) =>
+            RoomRepoMock.Setup(x => x.GetById(It.IsAny<Guid>())).ReturnsAsync((Guid id) =>
             {
-                return genRoomRepoMock.Object.GetAll().GetAwaiter().GetResult().FirstOrDefault(item => item.Id == id);
+                return RoomRepoMock.Object.GetAll().GetAwaiter().GetResult().FirstOrDefault(item => item.Id == id);
             });
 
-            var noteService = new NoteService(UnitOfWorkMock.Object, Mapper, new EncryptionDecryptionService(), Configuration);
-            var itemsCountBefore = await genNoteRepoMock.Object.GetItemsCount();
-            var encDecrService = new EncryptionDecryptionService();
+            var itemsCountBefore = await NoteRepoMock.Object.GetItemsCount();
 
-            var room = genRoomRepoMock.Object.GetQuery().FirstOrDefault();
-            room.Password = encDecrService.Encrypt(room.Password, Configuration.GetSection(AppSettings.SecretKey).Value);
+            var room = RoomRepoMock.Object.GetQuery().FirstOrDefault();
+            room.DecryptValues(EncryptionService, Configuration.GetSection(AppSettings.SecretKey).Value);
 
             //Arrange
-            var handler = new CreateNoteCommandHandler(Mapper, noteService, encDecrService, Configuration, UnitOfWorkMock.Object);
+            var handler = new CreateNoteCommandHandler(Mapper, NoteService);
 
             var request = new CreateNoteCommand()
             {
@@ -50,7 +43,7 @@ namespace BudgetHistory.Tests.HandlersTests.Notes
 
             //Act
             var result = await handler.Handle(request, CancellationToken.None);
-            var itemsCountAter = await genNoteRepoMock.Object.GetItemsCount();
+            var itemsCountAter = await NoteRepoMock.Object.GetItemsCount();
 
             //Assert
             result.IsSuccess.ShouldBeTrue();

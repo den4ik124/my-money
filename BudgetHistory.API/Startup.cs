@@ -23,6 +23,7 @@ namespace BudgetHistory.API
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddNotesServices(Configuration);
+            services.AddCustomServices(Configuration);
             services.AddIdentityServices(Configuration);
 
             services.AddSingleton<BudgetHistory.Logging.Interfaces.ITgLogger, TelegramLogger>();

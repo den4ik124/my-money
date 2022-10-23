@@ -1,10 +1,9 @@
 ﻿using AutoMapper;
 using BudgetHistory.Application.Core;
 using BudgetHistory.Application.DTOs.Note;
-using BudgetHistory.Core.Interfaces.Repositories;
-using BudgetHistory.Core.Models;
+using BudgetHistory.Core.Services.Interfaces;
 using MediatR;
-using System.Linq;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,27 +11,29 @@ namespace BudgetHistory.Application.Notes.Queries
 {
     public class GetNoteByIdQueryHandler : IRequestHandler<GetNoteByIdQuery, Result<NoteDto>>
     {
-        private readonly IUnitOfWork unitOfWork;
         private readonly IMapper mapper;
+        private readonly INoteService noteService;
 
-        public GetNoteByIdQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        public GetNoteByIdQueryHandler(IMapper mapper, INoteService noteService)
         {
-            this.unitOfWork = unitOfWork;
             this.mapper = mapper;
+            this.noteService = noteService;
         }
 
-        public Task<Result<NoteDto>> Handle(GetNoteByIdQuery request, CancellationToken cancellationToken)
+        public async Task<Result<NoteDto>> Handle(GetNoteByIdQuery request, CancellationToken cancellationToken)
         {
-            var noteFromDb = this.unitOfWork.GetGenericRepository<Note>()
-                                            .GetQuery(note => note.Id == request.NoteId)
-                                            .FirstOrDefault();
-            if (noteFromDb == null)
+            try
             {
-                return Task.FromResult(Result<NoteDto>.Failure($"Such note (ID : {request.NoteId}) does not exist"));
-            }
-            var response = this.mapper.Map<NoteDto>(noteFromDb);
+                var note = await this.noteService.GetNoteById(request.NoteId);
 
-            return Task.FromResult(Result<NoteDto>.Success(response));
+                var response = this.mapper.Map<NoteDto>(note.Value);
+
+                return Result<NoteDto>.Success(response);
+            }
+            catch (ArgumentNullException ex)
+            {
+                return Result<NoteDto>.Failure(ex.Message);
+            }
         }
     }
 }

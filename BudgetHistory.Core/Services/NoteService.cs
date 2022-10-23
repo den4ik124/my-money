@@ -18,86 +18,93 @@ namespace BudgetHistory.Core.Services
     {
         private readonly IUnitOfWork unitOfWork;
         private readonly IMapper mapper;
+        private readonly IRoomService roomService;
         private readonly IEncryptionDecryption encryptionDecryptionService;
-        private readonly IConfiguration configuration;
         private readonly IGenericRepository<Note> noteRepository;
-        private readonly IGenericRepository<Room> roomRepository;
 
-        public NoteService(IUnitOfWork unitOfWork, IMapper mapper, IEncryptionDecryption encryptionDecryption, IConfiguration configuration)
+        public NoteService(IUnitOfWork unitOfWork, IMapper mapper, IRoomService roomService, IEncryptionDecryption encryptionDecryption)
         {
             this.unitOfWork = unitOfWork;
             this.mapper = mapper;
+            this.roomService = roomService;
             this.encryptionDecryptionService = encryptionDecryption;
-            this.configuration = configuration;
             this.noteRepository = unitOfWork.GetGenericRepository<Note>();
-            this.roomRepository = unitOfWork.GetGenericRepository<Room>();
         }
 
         public async Task<IEnumerable<Note>> GetAllNotes(Guid roomId, int pageNumber, int pageSize, Expression<Func<Note, bool>> predicate = null, Func<IQueryable<Note>, IOrderedQueryable<Note>> orderBy = null)
         {
             var notes = GetItemsFromQuery(pageNumber, pageSize, predicate, orderBy);
-
-            var room = await roomRepository.GetById(roomId);
-            var decryptedPassword = encryptionDecryptionService.Decrypt(room.Password, configuration.GetSection(Constants.AppSettings.SecretKey).Value);
+            var room = (await roomService.GetRoomById(roomId)).Value;
 
             foreach (var note in notes)
             {
-                note.DecryptValues(encryptionDecryptionService, decryptedPassword);
+                note.DecryptValues(encryptionDecryptionService, room.Password);
             }
 
             return notes.OrderBy(note => note.DateOfCreation);
         }
 
-        public async Task<NoteServiceResponse> CreateNewNote(Note newNote, Currency currency, decimal value, Guid roomId, string roomPassword)
+        public async Task<ServiceResponse<Note>> GetNoteById(Guid noteId)
         {
-            var lastNote = noteRepository.GetQuery(note => note.RoomId == roomId
+            var note = noteRepository.GetQuery(note => note.Id == noteId).FirstOrDefault()
+                ?? throw new ArgumentNullException($"Note (ID : {noteId}) does not exist");
+
+            var room = (await roomService.GetRoomById(note.RoomId)).Value;
+
+            return new ServiceResponse<Note>() { IsSuccess = true, Value = note.DecryptValues(encryptionDecryptionService, room.Password) };
+        }
+
+        public async Task<ServiceResponse> CreateNewNote(Note newNote, Currency currency, decimal value)
+        {
+            var room = (await roomService.GetRoomById(newNote.RoomId)).Value;
+
+            var lastNote = noteRepository.GetQuery(note => note.RoomId == newNote.RoomId
                                      && note.Currency == currency,
                                      order => order.OrderBy(note => note.DateOfCreation))?.LastOrDefault();
             if (lastNote is not null)
             {
-                lastNote.DecryptValues(encryptionDecryptionService, roomPassword);
+                lastNote.DecryptValues(encryptionDecryptionService, room.Password);
                 newNote.Balance = lastNote.Balance + value;
             }
             else
             {
                 if (value < 0)
                 {
-                    return new NoteServiceResponse() { IsSuccess = false, Message = "Баланс не может иметь отрицательное значение!" };
+                    return new ServiceResponse() { IsSuccess = false, Message = "Баланс не может иметь отрицательное значение!" };
                 }
                 newNote.Balance = value;
             }
 
             newNote.Id = Guid.NewGuid();
-            newNote.EncryptValues(encryptionDecryptionService, roomPassword);
+            newNote.EncryptValues(encryptionDecryptionService, room.Password);
 
             if (await noteRepository.Add(newNote))
             {
                 await this.unitOfWork.CompleteAsync();
-                return new NoteServiceResponse() { IsSuccess = true, Message = $"Note (id : {newNote.Id})\nhas been created successfully!" }; ;
+                return new ServiceResponse() { IsSuccess = true, Message = $"Note (id : {newNote.Id})\nhas been created successfully!" }; ;
             }
-            return new NoteServiceResponse() { IsSuccess = false, Message = "Note was not created." }; ;
+            return new ServiceResponse() { IsSuccess = false, Message = "Note was not created." }; ;
         }
 
-        public async Task<NoteServiceResponse> DeleteNote(Guid noteId)
+        public async Task<ServiceResponse> DeleteNote(Guid noteId)
         {
-            return new NoteServiceResponse() { IsSuccess = false, Message = "Method not implemented properly." };
+            return new ServiceResponse() { IsSuccess = false, Message = "Method not implemented properly." };
         }
 
-        public async Task<NoteServiceResponse> UpdateNote(Note updatedNote)
+        public async Task<ServiceResponse> UpdateNote(Note updatedNote)
         {
             await this.unitOfWork.BeginTransactionAsync();
 
             var oldNote = await noteRepository.GetById(updatedNote.Id);
             if (oldNote is null)
             {
-                return new NoteServiceResponse() { IsSuccess = false, Message = $"Note (id : {updatedNote.Id}\nwas not found." };
+                return new ServiceResponse() { IsSuccess = false, Message = $"Note (id : {updatedNote.Id}\nwas not found." };
             }
 
-            var room = await roomRepository.GetById(updatedNote.RoomId);
-            var decryptedPassword = encryptionDecryptionService.Decrypt(room.Password, configuration.GetSection(Constants.AppSettings.SecretKey).Value);
+            var room = (await roomService.GetRoomById(updatedNote.RoomId)).Value;
 
-            oldNote.DecryptValues(encryptionDecryptionService, decryptedPassword);
-            updatedNote.EncryptValues(encryptionDecryptionService, decryptedPassword);
+            oldNote.DecryptValues(encryptionDecryptionService, room.Password);
+            updatedNote.EncryptValues(encryptionDecryptionService, room.Password);
 
             updatedNote.DateOfModification = DateTime.UtcNow;
             updatedNote.Balance = oldNote.Balance;
@@ -110,17 +117,17 @@ namespace BudgetHistory.Core.Services
                 noteRepository.Update(oldNote);
                 this.unitOfWork.TransactionCommit();
                 await this.unitOfWork.CompleteAsync();
-                return new NoteServiceResponse() { IsSuccess = true, Message = $"Note (id : {updatedNote.Id}\nhas been updated successfully." };
+                return new ServiceResponse() { IsSuccess = true, Message = $"Note (id : {updatedNote.Id}\nhas been updated successfully." };
             }
 
             try
             {
-                var notesToEdit = GetNotesWithUpdatedBalances(oldNote, updatedNote, decryptedPassword);
+                var notesToEdit = GetNotesWithUpdatedBalances(oldNote, updatedNote, room.Password);
 
                 if (!notesToEdit.Any())
                 {
                     this.unitOfWork.RollbackTransaction();
-                    return new NoteServiceResponse() { IsSuccess = false, Message = $"There are no notes to be updated." };
+                    return new ServiceResponse() { IsSuccess = false, Message = $"There are no notes to be updated." };
                 }
 
                 foreach (var note in notesToEdit)
@@ -130,12 +137,12 @@ namespace BudgetHistory.Core.Services
             }
             catch (NoteNegativeBalanceException ex)
             {
-                return new NoteServiceResponse() { IsSuccess = false, Message = ex.Message };
+                return new ServiceResponse() { IsSuccess = false, Message = ex.Message };
             }
 
             this.unitOfWork.TransactionCommit();
             await this.unitOfWork.CompleteAsync();
-            return new NoteServiceResponse() { IsSuccess = true, Message = $"Note (id : {updatedNote.Id}\nhas been updated successfully." };
+            return new ServiceResponse() { IsSuccess = true, Message = $"Note (id : {updatedNote.Id}\nhas been updated successfully." };
         }
 
         private IEnumerable<Note> GetNotesWithUpdatedBalances(Note oldNote, Note updatedNote, string roomPassword)

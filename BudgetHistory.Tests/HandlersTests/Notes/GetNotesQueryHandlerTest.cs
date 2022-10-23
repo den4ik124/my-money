@@ -1,9 +1,9 @@
 using BudgetHistory.Application.DTOs.Common;
 using BudgetHistory.Application.Notes.Queries;
 using BudgetHistory.Core.Constants;
-using BudgetHistory.Core.Interfaces.Repositories;
-using BudgetHistory.Core.Models;
+using BudgetHistory.Core.Extensions;
 using BudgetHistory.Core.Services;
+using BudgetHistory.Core.Services.Interfaces;
 using Moq;
 using Shouldly;
 using System;
@@ -15,19 +15,11 @@ namespace BudgetHistory.Tests.HandlersTests.Notes
 {
     public class GetNotesQueryHandlerTest : NotesBaseTest
     {
-        private readonly Mock<IGenericRepository<Room>> genRoomRepoMock;
-        private readonly Mock<IGenericRepository<Note>> genNoteRepoMock;
-
         public GetNotesQueryHandlerTest()
         {
-            genRoomRepoMock = Mocks.MockRepository.GetMockedRoomRepository();
-            genNoteRepoMock = Mocks.MockRepository.GetMockedNoteRepository();
-            UnitOfWorkMock.Setup(x => x.GetGenericRepository<Note>()).Returns(genNoteRepoMock.Object);
-            UnitOfWorkMock.Setup(x => x.GetGenericRepository<Room>()).Returns(genRoomRepoMock.Object);
-
-            genRoomRepoMock.Setup(x => x.GetById(It.IsAny<Guid>())).ReturnsAsync((Guid id) =>
+            RoomRepoMock.Setup(x => x.GetById(It.IsAny<Guid>())).ReturnsAsync((Guid id) =>
             {
-                return genRoomRepoMock.Object.GetAll().GetAwaiter().GetResult().FirstOrDefault(item => item.Id == id);
+                return RoomRepoMock.Object.GetAll().GetAwaiter().GetResult().FirstOrDefault(item => item.Id == id);
             });
         }
 
@@ -36,18 +28,17 @@ namespace BudgetHistory.Tests.HandlersTests.Notes
         [InlineData(2)]
         public async void GetNotesQueryHandler_ShouldReturn_ListOfMockedNotes(int size)
         {
-            var encrDecrService = new EncryptionDecryptionService();
-            var room = genRoomRepoMock.Object.GetQuery().FirstOrDefault();
+            var tokenServiceMock = new Mock<ITokenService>();
 
-            foreach (var note in genNoteRepoMock.Object.GetAll().Result)
+            var room = RoomRepoMock.Object.GetQuery().FirstOrDefault().DecryptValues(EncryptionService, Configuration.GetSection(AppSettings.SecretKey).Value);
+            var roomService = new RoomService(UnitOfWorkMock.Object, EncryptionService, Configuration, tokenServiceMock.Object);
+            foreach (var note in NoteRepoMock.Object.GetAll().Result)
             {
-                note.EncryptedValue = encrDecrService.Encrypt(note.Value.ToString(), room.Password);
-                note.EncryptedBalance = encrDecrService.Encrypt(note.Balance.ToString(), room.Password);
+                note.EncryptedValue = EncryptionService.Encrypt(note.Value.ToString(), room.Password);
+                note.EncryptedBalance = EncryptionService.Encrypt(note.Balance.ToString(), room.Password);
             }
 
-            room.Password = encrDecrService.Encrypt(room.Password, Configuration.GetSection(AppSettings.SecretKey).Value);
-
-            var noteService = new NoteService(UnitOfWorkMock.Object, Mapper, new EncryptionDecryptionService(), Configuration);
+            var noteService = new NoteService(UnitOfWorkMock.Object, Mapper, roomService, EncryptionService);
             //Arrange
             var handler = new GetNotesQueryHandler(UnitOfWorkMock.Object, Mapper, noteService);
             var pageParameters = new PagingFilteringDto()
