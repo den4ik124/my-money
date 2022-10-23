@@ -38,11 +38,9 @@ namespace BudgetHistory.Application.Notes.Commands
             var noteModel = this.mapper.Map<Note>(request.NoteDto);
 
             var currencyEnum = Enum.Parse<Currency>(request.NoteDto.Currency);
-            if (await noteService.CreateNewNote(noteModel, currencyEnum, request.NoteDto.Value, request.NoteDto.RoomId, decryptedPassword))
-            {
-                return Result<string>.Success("Creation succeeded.");
-            }
-            return Result<string>.Failure("Creation failed.");
+            var result = await noteService.CreateNewNote(noteModel, currencyEnum, request.NoteDto.Value, request.NoteDto.RoomId, decryptedPassword);
+
+            return result.IsSuccess ? Result<string>.Success(result.Message) : Result<string>.Failure(result.Message);
         }
     }
 }

@@ -47,8 +47,9 @@ namespace BudgetHistory.Tests.HandlersTests.Notes
 
             room.Password = encrDecrService.Encrypt(room.Password, Configuration.GetSection(AppSettings.SecretKey).Value);
 
+            var noteService = new NoteService(UnitOfWorkMock.Object, Mapper, new EncryptionDecryptionService(), Configuration);
             //Arrange
-            var handler = new GetNotesQueryHandler(UnitOfWorkMock.Object, Mapper, encrDecrService, Configuration);
+            var handler = new GetNotesQueryHandler(UnitOfWorkMock.Object, Mapper, noteService);
             var pageParameters = new PagingFilteringDto()
             {
                 PageInfo = new Application.Core.PageInfo()

@@ -1,8 +1,7 @@
 ﻿using BudgetHistory.Application.Core;
 using BudgetHistory.Core.Interfaces.Repositories;
-using BudgetHistory.Core.Models;
+using BudgetHistory.Core.Services.Interfaces;
 using MediatR;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -11,30 +10,21 @@ namespace BudgetHistory.Application.Notes.Commands
     public class DeleteNoteCommandHandler : IRequestHandler<DeleteNoteCommand, Result<string>>
     {
         private readonly IUnitOfWork unitOfWork;
+        private readonly INoteService noteService;
 
-        public DeleteNoteCommandHandler(IUnitOfWork unitOfWork)
+        public DeleteNoteCommandHandler(IUnitOfWork unitOfWork, INoteService noteService)
         {
             this.unitOfWork = unitOfWork;
+            this.noteService = noteService;
         }
 
         public async Task<Result<string>> Handle(DeleteNoteCommand request, CancellationToken cancellationToken)
         {
             await this.unitOfWork.BeginTransactionAsync();
-            var repository = this.unitOfWork.GetGenericRepository<Note>();
-            var noteFromDb = repository.GetQuery(n => n.Id == request.NoteId).FirstOrDefault();
-            if (noteFromDb == null)
-            {
-                return Result<string>.Failure($"Such note does not exists \n(Id = {request.NoteId}).");
-            }
 
-            if (repository.Delete(noteFromDb))
-            {
-                this.unitOfWork.TransactionCommit();
-                await this.unitOfWork.CompleteAsync();
-                return Result<string>.Success($"Note (Id : {request.NoteId}) has been removed.");
-            }
-            this.unitOfWork.RollbackTransaction();
-            return Result<string>.Failure($"Note (Id : {request.NoteId}) removing has failed.");
+            var result = await noteService.DeleteNote(request.NoteId);
+
+            return result.IsSuccess ? Result<string>.Success(result.Message) : Result<string>.Failure(result.Message);
         }
     }
 }
