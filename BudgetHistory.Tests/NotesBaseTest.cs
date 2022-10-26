@@ -27,14 +27,14 @@ namespace BudgetHistory.Tests
 
             var tokenServiceMock = new Mock<ITokenService>();
 
-            RoomService = new RoomService(UnitOfWorkMock.Object, EncryptionService, Configuration, tokenServiceMock.Object);
-            NoteService = new NoteService(UnitOfWorkMock.Object, Mapper, RoomService, EncryptionService);
-
             RoomRepoMock = Mocks.MockRepository.GetMockedRoomRepository();
             NoteRepoMock = Mocks.MockRepository.GetMockedNoteRepository();
 
             UnitOfWorkMock.Setup(x => x.GetGenericRepository<Note>()).Returns(NoteRepoMock.Object);
             UnitOfWorkMock.Setup(x => x.GetGenericRepository<Room>()).Returns(RoomRepoMock.Object);
+
+            RoomService = new RoomService(UnitOfWorkMock.Object, EncryptionService, Configuration, tokenServiceMock.Object);
+            NoteService = new NoteService(UnitOfWorkMock.Object, Mapper, RoomService, EncryptionService);
         }
 
         public IRoomService RoomService { get; set; }
