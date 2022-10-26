@@ -12,7 +12,5 @@ namespace BudgetHistory.Core.Services.Interfaces
         Task<ServiceResponse<string>> LogIn(string currentUserId, Guid roomId, string roomPassword);
 
         Task<ServiceResponse> CreateRoom(Room newRoom, Guid userId);
-
-        //TODO copy methods
     }
 }
