@@ -3,7 +3,6 @@ using BudgetHistory.Application.Notes.Commands;
 using BudgetHistory.Core.Constants;
 using BudgetHistory.Core.Extensions;
 using BudgetHistory.Core.Models;
-using BudgetHistory.Core.Services;
 using Moq;
 using Shouldly;
 using System;
@@ -19,14 +18,7 @@ namespace BudgetHistory.Tests.HandlersTests.Notes
         [Fact]
         public async void EditNoteCommandHandler_ShouldUpdate_NoteData()
         {
-            var genNoteRepoMock = Mocks.MockRepository.GetMockedNoteRepository();
-            var genRoomRepoMock = Mocks.MockRepository.GetMockedRoomRepository();
-            UnitOfWorkMock.Setup(x => x.GetGenericRepository<Note>()).Returns(genNoteRepoMock.Object);
-            UnitOfWorkMock.Setup(x => x.GetGenericRepository<Room>()).Returns(genRoomRepoMock.Object);
-
-            var encDecrService = new EncryptionDecryptionService();
-
-            var room = genRoomRepoMock.Object.GetQuery().FirstOrDefault();
+            var room = RoomRepoMock.Object.GetQuery().FirstOrDefault().DecryptValues(EncryptionService, Configuration.GetSection(AppSettings.SecretKey).Value);
 
             var items = new List<Note>()
             {
@@ -48,25 +40,23 @@ namespace BudgetHistory.Tests.HandlersTests.Notes
             };
             foreach (var item in items)
             {
-                item.EncryptValues(encDecrService, room.Password);
+                item.EncryptValues(EncryptionService, room.Password);
             }
 
-            room.Password = encDecrService.Encrypt(room.Password, Configuration.GetSection(AppSettings.SecretKey).Value);
-
-            genNoteRepoMock.Setup(rep => rep.Update(It.IsAny<Note>())).Returns((Note updatedItem) =>
+            NoteRepoMock.Setup(rep => rep.Update(It.IsAny<Note>())).Returns((Note updatedItem) =>
             {
                 var item = items.FirstOrDefault();
                 Mapper.Map(updatedItem, item);
                 return true;
             });
-            genNoteRepoMock.Setup(rep => rep.GetById(It.IsAny<Guid>())).ReturnsAsync(items.FirstOrDefault());
+            NoteRepoMock.Setup(rep => rep.GetById(It.IsAny<Guid>())).ReturnsAsync(items.FirstOrDefault());
 
-            genRoomRepoMock.Setup(x => x.GetById(It.IsAny<Guid>())).ReturnsAsync((Guid id) =>
+            RoomRepoMock.Setup(x => x.GetById(It.IsAny<Guid>())).ReturnsAsync((Guid id) =>
             {
-                return genRoomRepoMock.Object.GetAll().GetAwaiter().GetResult().FirstOrDefault(item => item.Id == id);
+                return RoomRepoMock.Object.GetAll().GetAwaiter().GetResult().FirstOrDefault(item => item.Id == id);
             });
 
-            var editedNote = genNoteRepoMock.Object.GetQuery().FirstOrDefault();
+            var editedNote = NoteRepoMock.Object.GetQuery().FirstOrDefault();
             var checkString = room.Id;
 
             var editedNoteDto = new NoteDto();
@@ -74,10 +64,8 @@ namespace BudgetHistory.Tests.HandlersTests.Notes
             editedNoteDto.UserId = checkString;
             editedNoteDto.RoomId = checkString;
 
-            var noteService = new NoteService(UnitOfWorkMock.Object, Mapper, encDecrService, Configuration);
-
             //Arrange
-            var handler = new EditNoteCommandHandler(noteService, Mapper);
+            var handler = new EditNoteCommandHandler(NoteService, Mapper);
 
             var request = new EditNoteCommand()
             {

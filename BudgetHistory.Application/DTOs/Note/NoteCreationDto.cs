@@ -8,5 +8,6 @@ namespace BudgetHistory.Application.DTOs.Note
         public Guid RoomId { get; set; }
         public decimal Value { get; set; }
         public string Currency { get; set; }
+        public string Comment { get; set; }
     }
 }

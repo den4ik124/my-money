@@ -33,22 +33,26 @@ namespace BudgetHistory.Tests.Mocks
         public static Mock<IGenericRepository<Room>> GetMockedRoomRepository()
         {
             var password = "pa$$word123";
+            var encryptedPassword = "49pvlHnhaTRUmNU9oZFo8A==";
             var items = new List<Room>()
             {
                 new Room()
                 {
                     Id = Guid.NewGuid(),
-                    Password = password
+                    Password = password,
+                    EncryptedPassword = encryptedPassword
                 },
                 new Room()
                 {
                     Id = Guid.NewGuid(),
-                    Password = password
+                    Password = password,
+                    EncryptedPassword = encryptedPassword
                 },
                 new Room()
                 {
                     Id = Guid.NewGuid(),
-                    Password = password
+                    Password = password,
+                    EncryptedPassword = encryptedPassword
                 },
             };
             return RepositoryCreation(items);
@@ -92,6 +96,11 @@ namespace BudgetHistory.Tests.Mocks
                     {
                         return items.AsQueryable().Where(predicate);
                     }
+                    if (orderBy != null)
+                    {
+                        return orderBy(items.AsQueryable());
+                    }
+
                     return items.AsQueryable();
                 });
 

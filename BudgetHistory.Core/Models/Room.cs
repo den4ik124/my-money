@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BudgetHistory.Core.Models
 {
@@ -10,7 +11,11 @@ namespace BudgetHistory.Core.Models
         public Guid OwnerId { get; set; }
         public DateTime DateOfCreation { get; set; }
         public string Name { get; set; }
+
+        [NotMapped]
         public string Password { get; set; }
+
+        public string EncryptedPassword { get; set; }
         public IEnumerable<Note> Notes { get; set; }
     }
 }

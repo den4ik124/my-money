@@ -23,11 +23,9 @@ namespace BudgetHistory.Application.Notes.Commands
         {
             var note = this.mapper.Map<Note>(request.EditedNote);
 
-            if (await noteService.UpdateNote(note))
-            {
-                return Result<string>.Success("Success");
-            }
-            return Result<string>.Failure($"Note (Id : {request.EditedNote.Id}) edit has been canceled.");
+            var result = await noteService.UpdateNote(note);
+
+            return result.IsSuccess ? Result<string>.Success(result.Message) : Result<string>.Failure(result.Message);
         }
     }
 }

@@ -1,15 +1,9 @@
 ﻿using AutoMapper;
 using BudgetHistory.Application.Core;
-using BudgetHistory.Core.Constants;
-using BudgetHistory.Core.Interfaces;
-using BudgetHistory.Core.Interfaces.Repositories;
 using BudgetHistory.Core.Models;
+using BudgetHistory.Core.Services.Interfaces;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,47 +11,21 @@ namespace BudgetHistory.Application.Rooms.Commands
 {
     public class CreateNewRoomCommandHandler : IRequestHandler<CreateNewRoomCommand, Result<string>>
     {
-        private readonly IUnitOfWork unitOfWork;
         private readonly IMapper mapper;
-        private readonly IEncryptionDecryption encryptionDecryptionService;
-        private readonly IConfiguration config;
+        private readonly IRoomService roomService;
 
-        public CreateNewRoomCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, IEncryptionDecryption encryptionDecryptionService, IConfiguration config)
+        public CreateNewRoomCommandHandler(IMapper mapper, IRoomService roomService)
         {
-            this.unitOfWork = unitOfWork;
             this.mapper = mapper;
-            this.encryptionDecryptionService = encryptionDecryptionService;
-            this.config = config;
+            this.roomService = roomService;
         }
 
         public async Task<Result<string>> Handle(CreateNewRoomCommand request, CancellationToken cancellationToken)
         {
-            request.NewRoomDto.Id = Guid.NewGuid();
-            request.NewRoomDto.DateOfCreation = DateTime.UtcNow;
-            request.NewRoomDto.Password = encryptionDecryptionService.Encrypt(request.NewRoomDto.Password, config.GetSection(AppSettings.SecretKey).Value);
-
             var room = mapper.Map<Room>(request.NewRoomDto);
 
-            var userRepository = unitOfWork.GetGenericRepository<User>();
-            var user = userRepository.GetQuery(u => u.AssociatedIdentityUserId.ToString() == request.UserId).Include(r => r.Rooms).FirstOrDefault();
-            if (user is null)
-            {
-                return Result<string>.Failure("Creation failed. User does not exist.");
-            }
-
-            room.OwnerId = user.Id;
-
-            user.Rooms.Append(room);
-            var isUserUpdated = userRepository.Update(user);
-
-            room.Users = new List<User>() { user };
-
-            var result = await unitOfWork.GetGenericRepository<Room>().Add(room);
-            if (result && await unitOfWork.CompleteAsync())
-            {
-                return Result<string>.Success("Creation succeeded.");
-            }
-            return Result<string>.Failure("Creation failed.");
+            var result = await roomService.CreateRoom(room, new Guid(request.UserId));
+            return result.IsSuccess ? Result<string>.Success(result.Message) : Result<string>.Failure(result.Message);
         }
     }
 }
