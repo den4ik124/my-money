@@ -1,6 +1,7 @@
 ﻿using BudgetHistory.Core.Interfaces.Repositories;
 using BudgetHistory.Data;
 using BudgetHistory.Data.Seed.Interfaces;
+using BudgetHistory.Logging.Interfaces;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -22,7 +23,7 @@ namespace BudgetHistory.API
 
             var services = scope.ServiceProvider;
             var logger = services.GetService<ILogger<Program>>();
-            var tgLogger = services.GetService<ILogger>();
+            var tgLogger = services.GetService<ITgLogger>();
             try
             {
                 var dbContexts = new List<DbContext>()
@@ -39,7 +40,7 @@ namespace BudgetHistory.API
             catch (Exception ex)
             {
                 logger.LogError(ex, "An error occured during Migration.\n" + ex.Message);
-                tgLogger.LogError(ex, "An error occured during Migration.\n" + ex.Message);
+                tgLogger.LogError($"An error occured during Migration.\n{ex.Message}");
             }
             try
             {
@@ -51,7 +52,7 @@ namespace BudgetHistory.API
             catch (Exception ex)
             {
                 logger.LogError(ex, "An error occured during data seeding.\n" + ex.Message);
-                tgLogger.LogError(ex, "An error occured during data seeding.\n" + ex.Message);
+                tgLogger.LogError($"An error occured during data seeding.\n{ex.Message}");
             }
 
             builder.Run();

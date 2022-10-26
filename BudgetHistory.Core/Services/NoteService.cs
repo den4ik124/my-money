@@ -224,7 +224,8 @@ namespace BudgetHistory.Core.Services
         {
             var notesToUpdate = noteRepository.GetQuery(note => note.RoomId == updatedNote.RoomId
                                                      && note.DateOfCreation >= oldNote.DateOfCreation
-                                                     && note.Currency == oldNote.Currency);
+                                                     && note.Currency == oldNote.Currency,
+                                                     _ => _.OrderBy(note => note.DateOfCreation));
 
             foreach (var item in notesToUpdate)
             {
@@ -232,7 +233,7 @@ namespace BudgetHistory.Core.Services
             }
 
             var firstNote = notesToUpdate.FirstOrDefault()?.DecryptValues(encryptionDecryptionService, roomPassword)
-                ?? throw new Exception("В списке записей - нет записей! Проверь запрос и всё ли в порядке с записями в БД."); ;
+                ?? throw new Exception("В списке записей - нет записей! Проверь запрос и всё ли в порядке с записями в БД.");
 
             var groupInitialBalance = firstNote.Balance - firstNote.Value;
 
