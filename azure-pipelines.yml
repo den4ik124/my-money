@@ -8,20 +8,18 @@ variables:
 - group : secrets
 - name: BuildParameters.RestoreBuildProjects
   value: '**/BudgetHistory.API.csproj'
-- name: BudgetHistory.Tests
+- name: BuildParameters.TestProjects
   value: '**/*[Tt]ests/*.csproj'
 name: $(date:yyyyMMdd)$(rev:.r)
 trigger:
 - master
 jobs:
 - job: Job_1
-  displayName: Agent job 1
+  displayName: Build project, check tests and prepare artifacts
   pool:
     vmImage: ubuntu-22.04
   steps:
   - checkout: self
-
-
 
   # - task: FileTransform@1
   #   displayName: "Variables substitution"
