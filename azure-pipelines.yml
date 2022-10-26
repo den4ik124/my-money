@@ -27,14 +27,17 @@ jobs:
   #     folderPath: '$(System.DefaultWorkingDirectory)/**/*.zip' 
   #     fileType: 'json'
   #     targetFiles: '**/appsettings.json'
-
+  
+  - task: UseDotNet@2
+    displayName: 'Use .NET Core sdk 2.x'
+    inputs:
+      version: 2.x
+    
   - task: DotNetCoreCLI@2
     displayName: Restore
     inputs:
       command: restore
       projects: $(BuildParameters.RestoreBuildProjects)
-      
-
 
   - task: DotNetCoreCLI@2
     displayName: Build
@@ -53,7 +56,7 @@ jobs:
   #     actionOnMissing: 'warn'
   #     keepToken: false
   #     actionOnNoFiles: 'continue'
-  #     enableTransforms: false
+  #     enableTransforms: true
   #     enableRecursion: false
   #     useLegacyPattern: false
   #     enableTelemetry: false
