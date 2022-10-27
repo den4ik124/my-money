@@ -18,14 +18,12 @@ namespace BudgetHistory.API.Controllers
     {
         private readonly IUnitOfWork unitOfWork;
         private readonly IEncryptionDecryption encryptionDecryptionService;
-        private readonly IConfiguration configuration;
         private readonly IRoomService roomService;
 
-        public TestController(IUnitOfWork unitOfWork, IEncryptionDecryption encryptionDecryptionService, IConfiguration configuration, IRoomService roomService)
+        public TestController(IUnitOfWork unitOfWork, IEncryptionDecryption encryptionDecryptionService, IRoomService roomService)
         {
             this.unitOfWork = unitOfWork;
             this.encryptionDecryptionService = encryptionDecryptionService;
-            this.configuration = configuration;
             this.roomService = roomService;
         }
 
@@ -37,7 +35,8 @@ namespace BudgetHistory.API.Controllers
 
             var room = (await roomService.GetRoomById(roomId)).Value;
 
-            var groups = noteRepos.GetQuery(note => !note.IsDeleted && note.RoomId == room.Id).AsEnumerable().GroupBy(note => note.Currency);
+            var groups = noteRepos.GetQuery(note => !note.IsDeleted && note.RoomId == room.Id,
+                                            order => order.OrderBy(note => note.DateOfCreation)).AsEnumerable().GroupBy(note => note.Currency);
 
             var joinedList = new List<Note>();
 
