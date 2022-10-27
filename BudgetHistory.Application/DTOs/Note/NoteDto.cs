@@ -13,5 +13,6 @@ namespace BudgetHistory.Application.DTOs.Note
         public DateTime DateOfLastModification { get; set; }
         public decimal Balance { get; set; }
         public bool IsDeleted { get; set; }
+        public string? Comment { get; set; }
     }
 }

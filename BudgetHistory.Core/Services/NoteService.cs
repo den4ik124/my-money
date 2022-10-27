@@ -164,6 +164,8 @@ namespace BudgetHistory.Core.Services
                                                            .AsEnumerable()
                                                            .GroupBy(note => note.Currency);
 
+            //TODO : ‼️ Sequence contains no elements
+
             foreach (var currencyGroup in currencyGroups)
             {
                 foreach (var item in currencyGroup)
@@ -205,9 +207,11 @@ namespace BudgetHistory.Core.Services
             var oldGroupInitialBalance = oldGroupFirstElement is null ? 0 : oldGroupFirstElement.Balance - oldGroupFirstElement.Value; //запомнили -1 баланс
 
             oldCurrencyGroup.Remove(oldNote);
-
-            //Пересчитать баланс старых записей
-            oldCurrencyGroup = RecalculateBalances(oldCurrencyGroup.ToList(), oldGroupInitialBalance, roomPassword);
+            if (oldCurrencyGroup.Count > 0)
+            {
+                //Пересчитать баланс старых записей
+                oldCurrencyGroup = RecalculateBalances(oldCurrencyGroup, oldGroupInitialBalance, roomPassword);
+            }
 
             this.mapper.Map(updatedNote, oldNote);
 
