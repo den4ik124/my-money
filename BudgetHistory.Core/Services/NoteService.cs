@@ -164,8 +164,6 @@ namespace BudgetHistory.Core.Services
                                                            .AsEnumerable()
                                                            .GroupBy(note => note.Currency);
 
-            //TODO : ‼️ Sequence contains no elements
-
             foreach (var currencyGroup in currencyGroups)
             {
                 foreach (var item in currencyGroup)
@@ -187,8 +185,8 @@ namespace BudgetHistory.Core.Services
             {
                 newCurrencyGroup = currencyGroups.FirstOrDefault(group => group.Key == updatedNote.Currency)
                                                  .ToList();
-                var newGroupFirstElement = newCurrencyGroup.FirstOrDefault(); //получили первый элемент новой коллекции
-                newGroupInitialBalance = newGroupFirstElement.Balance - newGroupFirstElement.Value; //запомнили -1 баланс
+                var newGroupFirstElement = newCurrencyGroup.FirstOrDefault();
+                newGroupInitialBalance = newGroupFirstElement.Balance - newGroupFirstElement.Value;
             }
             else
             {
@@ -203,13 +201,12 @@ namespace BudgetHistory.Core.Services
                 }
             }
 
-            var oldGroupFirstElement = oldCurrencyGroup.FirstOrDefault(); //получили первый элемент новой коллекции
-            var oldGroupInitialBalance = oldGroupFirstElement is null ? 0 : oldGroupFirstElement.Balance - oldGroupFirstElement.Value; //запомнили -1 баланс
+            var oldGroupFirstElement = oldCurrencyGroup.FirstOrDefault(); 
+            var oldGroupInitialBalance = oldGroupFirstElement is null ? 0 : oldGroupFirstElement.Balance - oldGroupFirstElement.Value;
 
             oldCurrencyGroup.Remove(oldNote);
             if (oldCurrencyGroup.Count > 0)
             {
-                //Пересчитать баланс старых записей
                 oldCurrencyGroup = RecalculateBalances(oldCurrencyGroup, oldGroupInitialBalance, roomPassword);
             }
 
@@ -217,11 +214,9 @@ namespace BudgetHistory.Core.Services
 
             newCurrencyGroup.Insert(0, oldNote);
 
-            //Пересчитать баланс новых записей
             newCurrencyGroup = RecalculateBalances(newCurrencyGroup, newGroupInitialBalance, roomPassword);
 
-            var concatedList = oldCurrencyGroup.Concat(newCurrencyGroup);
-            return concatedList;
+            return oldCurrencyGroup.Concat(newCurrencyGroup); ;
         }
 
         private IEnumerable<Note> RecalculateNotesWithSameCurrency(Note oldNote, Note updatedNote, string roomPassword)
@@ -272,7 +267,8 @@ namespace BudgetHistory.Core.Services
                     }
                 }
 
-                if (note.Balance < 0)
+
+            if (note.Balance < 0)
                 {
                     throw new NoteNegativeBalanceException($"Изменение в записи (id:{note.Id})\nведет к отрицательному балансу в следующих записях. Проверьте валидность указанного значения.");
                 }
