@@ -2,7 +2,7 @@
 
 namespace BudgetHistory.Logging.Interfaces
 {
-    public interface ITgLogger
+    public interface ICustomLogger
     {
         Task LogError(string errorMessage);
 

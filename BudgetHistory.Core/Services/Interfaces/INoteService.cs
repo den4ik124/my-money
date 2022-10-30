@@ -12,7 +12,7 @@ namespace BudgetHistory.Core.Services.Interfaces
     {
         Task<ServiceResponse<Note>> GetNoteById(Guid noteId);
 
-        Task<IEnumerable<Note>> GetAllNotes(Guid roomId, int pageNumber, int pageSize, Expression<Func<Note, bool>> predicate = null,
+        Task<ServiceResponse<IEnumerable<Note>>> GetAllNotes(Guid roomId, int pageNumber, int pageSize, Expression<Func<Note, bool>> predicate = null,
                                                     Func<IQueryable<Note>, IOrderedQueryable<Note>> orderBy = null);
 
         Task<ServiceResponse> CreateNewNote(Note newNote, Currency currency, decimal value);

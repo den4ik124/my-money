@@ -15,7 +15,7 @@ namespace BudgetHistory.API.Controllers
         [HttpPost("notes")]
         public async Task<IActionResult> GetNotes([FromBody] GetNotesRequestDto request /*PagingFilteringDto filteringData*/)
         {
-            return HandleResult(await this.Mediator.Send(new GetNotesQuery() { RoomId = new Guid(request.RoomId), PageParameters = request.PageInfo }));
+            return HandleResult(await Mediator.Send(new GetNotesQuery() { RoomId = new Guid(request.RoomId), PageParameters = request.PageInfo }));
         }
 
         [HttpGet("{id}")]
@@ -30,7 +30,7 @@ namespace BudgetHistory.API.Controllers
         [HttpPost("create")]
         public async Task<IActionResult> CreateNewNote(NoteCreationDto newNoteData)
         {
-            return HandleResult(await this.Mediator.Send(new CreateNoteCommand() { NoteDto = newNoteData }));
+            return HandleResult(await Mediator.Send(new CreateNoteCommand() { NoteDto = newNoteData }));
         }
 
         [HttpPut("edit")]

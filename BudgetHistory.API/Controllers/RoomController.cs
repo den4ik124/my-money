@@ -29,7 +29,7 @@ namespace BudgetHistory.API.Controllers
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             return userId is null
                 ? BadRequest("Unknown user.")
-                : HandleResult(await Mediator.Send(new GetRoomByIdQuery() { HttpContext = this.HttpContext, UserId = userId, RoomId = roomId }));
+                : HandleResult(await Mediator.Send(new GetRoomByIdQuery() { UserId = userId, RoomId = roomId }));
         }
 
         [HttpPost("create-new-room")]
@@ -49,7 +49,7 @@ namespace BudgetHistory.API.Controllers
 
             return userId is null
                 ? BadRequest("Unknown user.")
-                : HandleResult(await Mediator.Send(new LoginRoomCommand() { CurrentUserId = userId, HttpContext = this.HttpContext, LoginRoomDto = loginRoomDto }));
+                : HandleResult(await Mediator.Send(new LoginRoomCommand() { CurrentUserId = userId, HttpContext = base.HttpContext, LoginRoomDto = loginRoomDto }));
         }
     }
 }

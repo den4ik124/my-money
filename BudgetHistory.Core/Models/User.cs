@@ -3,9 +3,8 @@ using System.Collections.Generic;
 
 namespace BudgetHistory.Core.Models
 {
-    public class User
+    public class User : BaseEntity<Guid>
     {
-        public Guid Id { get; set; }
         public string UserName { get; set; }
         public string Email { get; set; }
         public Guid AssociatedIdentityUserId { get; set; }

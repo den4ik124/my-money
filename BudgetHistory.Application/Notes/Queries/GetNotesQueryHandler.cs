@@ -13,24 +13,24 @@ namespace BudgetHistory.Application.Notes.Queries
 {
     public class GetNotesQueryHandler : IRequestHandler<GetNotesQuery, Result<PagedList<NoteDto>>>
     {
-        private readonly IMapper mapper;
-        private readonly INoteService noteService;
-        private readonly IGenericRepository<Note> noteRepository;
+        private readonly IMapper _mapper;
+        private readonly INoteService _noteService;
+        private readonly IGenericRepository<Note> _noteRepository;
 
         public GetNotesQueryHandler(IUnitOfWork unitOfWork, IMapper mapper, INoteService noteService)
         {
-            this.mapper = mapper;
-            this.noteService = noteService;
-            this.noteRepository = unitOfWork.GetGenericRepository<Note>();
+            _mapper = mapper;
+            _noteService = noteService;
+            _noteRepository = unitOfWork.GetGenericRepository<Note>();
         }
 
         public async Task<Result<PagedList<NoteDto>>> Handle(GetNotesQuery request, CancellationToken cancellationToken)
         {
-            var notes = await noteService.GetAllNotes(request.RoomId, request.PageParameters.Page, request.PageParameters.Size);
+            var notes = (await _noteService.GetAllNotes(request.RoomId, request.PageParameters.Page, request.PageParameters.Size)).Value;
 
-            var response = this.mapper.Map<IEnumerable<NoteDto>>(notes);
+            var response = _mapper.Map<IEnumerable<NoteDto>>(notes);
 
-            request.PageParameters.Items = await this.noteRepository.GetItemsCount();
+            request.PageParameters.Items = await _noteRepository.GetItemsCount();
             return Result<PagedList<NoteDto>>.Success(new PagedList<NoteDto>(response, request.PageParameters));
         }
     }

@@ -1,7 +1,7 @@
 ﻿using BudgetHistory.Core.Constants;
+using BudgetHistory.Logging;
 using BudgetHistory.Logging.Interfaces;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
 
@@ -9,17 +9,14 @@ namespace BudgetHistory.API.Middleware
 {
     public class AuthTokenCheckerMiddleware
     {
-        private readonly RequestDelegate next;
-        private readonly ILogger<AuthTokenCheckerMiddleware> logger;
-        private readonly ITgLogger tgLogger;
+        private readonly RequestDelegate _next;
+        private readonly CustomLogger _logger;
 
         public AuthTokenCheckerMiddleware(RequestDelegate next,
-                                          ILogger<AuthTokenCheckerMiddleware> logger,
-                                          ITgLogger tgLogger)
+                                         ICustomLoggerFactory log)
         {
-            this.next = next;
-            this.logger = logger;
-            this.tgLogger = tgLogger;
+            _next = next;
+            _logger = log.CreateLogger<AuthTokenCheckerMiddleware>();
         }
 
         public async Task InvokeAsync(HttpContext context)
@@ -32,12 +29,11 @@ namespace BudgetHistory.API.Middleware
                 {
                     context.Request.Headers.Add(Headers.Authorization, "Bearer " + token);
                 }
-                await this.next(context);
+                await _next(context);
             }
             catch (Exception ex)
             {
-                this.logger.LogError(ex, ex.Message);
-                await this.tgLogger.LogError(ex.Message);
+                await _logger.LogError(ex.Message);
             }
         }
     }

@@ -11,22 +11,22 @@ namespace BudgetHistory.Application.Notes.Queries
 {
     public class GetNoteByIdQueryHandler : IRequestHandler<GetNoteByIdQuery, Result<NoteDto>>
     {
-        private readonly IMapper mapper;
-        private readonly INoteService noteService;
+        private readonly IMapper _mapper;
+        private readonly INoteService _noteService;
 
         public GetNoteByIdQueryHandler(IMapper mapper, INoteService noteService)
         {
-            this.mapper = mapper;
-            this.noteService = noteService;
+            _mapper = mapper;
+            _noteService = noteService;
         }
 
         public async Task<Result<NoteDto>> Handle(GetNoteByIdQuery request, CancellationToken cancellationToken)
         {
             try
             {
-                var note = await this.noteService.GetNoteById(request.NoteId);
+                var note = await _noteService.GetNoteById(request.NoteId);
 
-                var response = this.mapper.Map<NoteDto>(note.Value);
+                var response = _mapper.Map<NoteDto>(note.Value);
 
                 return Result<NoteDto>.Success(response);
             }

@@ -16,24 +16,24 @@ namespace BudgetHistory.API.Controllers
     [Authorize]
     public class TestController : BaseApiController
     {
-        private readonly IUnitOfWork unitOfWork;
-        private readonly IEncryptionDecryption encryptionDecryptionService;
-        private readonly IRoomService roomService;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IEncryptionDecryption _encryptionDecryptionService;
+        private readonly IRoomService _roomService;
 
         public TestController(IUnitOfWork unitOfWork, IEncryptionDecryption encryptionDecryptionService, IRoomService roomService)
         {
-            this.unitOfWork = unitOfWork;
-            this.encryptionDecryptionService = encryptionDecryptionService;
-            this.roomService = roomService;
+            _unitOfWork = unitOfWork;
+            _encryptionDecryptionService = encryptionDecryptionService;
+            _roomService = roomService;
         }
 
         [HttpPost("recalculate-balances/{roomId}")]
         public async Task<IActionResult> RecalculateBalances(Guid roomId)
         {
-            var noteRepos = unitOfWork.GetGenericRepository<Note>();
-            var roomRepos = unitOfWork.GetGenericRepository<Room>();
+            var noteRepos = _unitOfWork.GetGenericRepository<Note>();
+            var roomRepos = _unitOfWork.GetGenericRepository<Room>();
 
-            var room = (await roomService.GetRoomById(roomId)).Value;
+            var room = (await _roomService.GetRoomById(roomId)).Value;
 
             var groups = noteRepos.GetQuery(note => !note.IsDeleted && note.RoomId == room.Id,
                                             order => order.OrderBy(note => note.DateOfCreation)).AsEnumerable().GroupBy(note => note.Currency);
@@ -46,7 +46,7 @@ namespace BudgetHistory.API.Controllers
                 var notesInGroup = currencyGroup.ToArray();
                 for (int i = 0; i < itemsCount; i++)
                 {
-                    notesInGroup[i].DecryptValues(encryptionDecryptionService, room.Password);
+                    notesInGroup[i].DecryptValues(_encryptionDecryptionService, room.Password);
                     if (i == 0)
                     {
                         notesInGroup[i].Balance = notesInGroup[i].Value;
@@ -55,24 +55,24 @@ namespace BudgetHistory.API.Controllers
                     {
                         notesInGroup[i].Balance = notesInGroup[i - 1].Balance + notesInGroup[i].Value;
                     }
-                    notesInGroup[i].EncryptValues(encryptionDecryptionService, room.Password);
+                    notesInGroup[i].EncryptValues(_encryptionDecryptionService, room.Password);
                 }
 
                 joinedList.AddRange(notesInGroup);
             }
 
-            await unitOfWork.BeginTransactionAsync();
+            await _unitOfWork.BeginTransactionAsync();
 
             foreach (var item in joinedList)
             {
                 if (!noteRepos.Update(item))
                 {
-                    unitOfWork.RollbackTransaction();
+                    _unitOfWork.RollbackTransaction();
                     return BadRequest($"Проблемы при обновлении id: {item.Id}");
                 }
             }
-            unitOfWork.TransactionCommit();
-            await unitOfWork.CompleteAsync();
+            _unitOfWork.TransactionCommit();
+            await _unitOfWork.CompleteAsync();
 
             return Ok(joinedList.OrderBy(note => note.DateOfCreation));
         }

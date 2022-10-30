@@ -14,19 +14,19 @@ namespace BudgetHistory.Application.Rooms.Queries
 {
     public class GetRoomsQueryHandler : IRequestHandler<GetRoomsQuery, Result<IEnumerable<RoomResponseDto>>>
     {
-        private readonly IUnitOfWork unitOfWork;
-        private readonly IMapper mapper;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
         public GetRoomsQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
         {
-            this.unitOfWork = unitOfWork;
-            this.mapper = mapper;
+            _unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
 
         public Task<Result<IEnumerable<RoomResponseDto>>> Handle(GetRoomsQuery request, CancellationToken cancellationToken)
         {
-            var rooms = this.unitOfWork.GetGenericRepository<Room>().GetQuery(r => r.Users.Select(u => u.AssociatedIdentityUserId).Contains(request.UserId)).AsEnumerable();
-            var roomsDto = mapper.Map<IEnumerable<RoomResponseDto>>(rooms);
+            var rooms = _unitOfWork.GetGenericRepository<Room>().GetQuery(r => r.Users.Select(u => u.AssociatedIdentityUserId).Contains(request.UserId)).AsEnumerable();
+            var roomsDto = _mapper.Map<IEnumerable<RoomResponseDto>>(rooms);
             return Task.FromResult(Result<IEnumerable<RoomResponseDto>>.Success(roomsDto));
         }
     }

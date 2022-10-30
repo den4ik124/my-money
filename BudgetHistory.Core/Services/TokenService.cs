@@ -17,18 +17,18 @@ namespace BudgetHistory.Core.Services
 {
     public class TokenService : ITokenService
     {
-        private readonly UserManager<IdentityUser> userManager;
-        private readonly AuthTokenParameters authTokenParameters;
+        private readonly UserManager<IdentityUser> _userManager;
+        private readonly AuthTokenParameters _authTokenParameters;
 
         public TokenService(UserManager<IdentityUser> userManager, IOptions<AuthTokenParameters> authTokenParameters)
         {
-            this.userManager = userManager;
-            this.authTokenParameters = authTokenParameters.Value;
+            _userManager = userManager;
+            _authTokenParameters = authTokenParameters.Value;
         }
 
         public async Task<string> CreateAuthTokenAsync(IdentityUser user)
         {
-            var roles = await this.userManager.GetRolesAsync(user);
+            var roles = await _userManager.GetRolesAsync(user);
             var claims = new List<Claim>()
             {
                 new Claim(ClaimTypes.Name, user.UserName),
@@ -38,7 +38,7 @@ namespace BudgetHistory.Core.Services
             {
                 claims.Add(new Claim(ClaimTypes.Role, role));
             }
-            PrepareTokenData(claims, out JwtSecurityTokenHandler tokenHandler, out SecurityToken token, authTokenParameters.TokenExpirationTimeInHours * 60);
+            PrepareTokenData(claims, out JwtSecurityTokenHandler tokenHandler, out SecurityToken token, _authTokenParameters.TokenExpirationTimeInHours * 60);
 
             return tokenHandler.WriteToken(token);
         }
@@ -66,7 +66,7 @@ namespace BudgetHistory.Core.Services
 
         private void PrepareTokenData(List<Claim> claims, out JwtSecurityTokenHandler tokenHandler, out SecurityToken token, int expirationTimeInMinutes)
         {
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(authTokenParameters.SigningKey));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_authTokenParameters.SigningKey));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
 
             var tokenDescriptor = new SecurityTokenDescriptor()
@@ -74,8 +74,8 @@ namespace BudgetHistory.Core.Services
                 Subject = new ClaimsIdentity(claims),
                 Expires = DateTime.Now.AddMinutes(expirationTimeInMinutes),
                 SigningCredentials = credentials,
-                Issuer = this.authTokenParameters.Issuer,
-                Audience = this.authTokenParameters.Audience,
+                Issuer = _authTokenParameters.Issuer,
+                Audience = _authTokenParameters.Audience,
             };
 
             tokenHandler = new JwtSecurityTokenHandler();

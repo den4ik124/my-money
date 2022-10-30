@@ -10,20 +10,20 @@ namespace BudgetHistory.Application.Notes.Commands
 {
     public class EditNoteCommandHandler : IRequestHandler<EditNoteCommand, Result<string>>
     {
-        private readonly INoteService noteService;
-        private readonly IMapper mapper;
+        private readonly INoteService _noteService;
+        private readonly IMapper _mapper;
 
         public EditNoteCommandHandler(INoteService noteService, IMapper mapper)
         {
-            this.noteService = noteService;
-            this.mapper = mapper;
+            _noteService = noteService;
+            _mapper = mapper;
         }
 
         public async Task<Result<string>> Handle(EditNoteCommand request, CancellationToken cancellationToken)
         {
-            var note = this.mapper.Map<Note>(request.EditedNote);
+            var note = _mapper.Map<Note>(request.EditedNote);
 
-            var result = await noteService.UpdateNote(note);
+            var result = await _noteService.UpdateNote(note);
 
             return result.IsSuccess ? Result<string>.Success(result.Message) : Result<string>.Failure(result.Message);
         }

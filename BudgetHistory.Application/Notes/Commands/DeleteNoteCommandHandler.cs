@@ -9,20 +9,20 @@ namespace BudgetHistory.Application.Notes.Commands
 {
     public class DeleteNoteCommandHandler : IRequestHandler<DeleteNoteCommand, Result<string>>
     {
-        private readonly IUnitOfWork unitOfWork;
-        private readonly INoteService noteService;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly INoteService _noteService;
 
         public DeleteNoteCommandHandler(IUnitOfWork unitOfWork, INoteService noteService)
         {
-            this.unitOfWork = unitOfWork;
-            this.noteService = noteService;
+            _unitOfWork = unitOfWork;
+            _noteService = noteService;
         }
 
         public async Task<Result<string>> Handle(DeleteNoteCommand request, CancellationToken cancellationToken)
         {
-            await this.unitOfWork.BeginTransactionAsync();
+            await _unitOfWork.BeginTransactionAsync();
 
-            var result = await noteService.DeleteNote(request.NoteId);
+            var result = await _noteService.DeleteNote(request.NoteId);
 
             return result.IsSuccess ? Result<string>.Success(result.Message) : Result<string>.Failure(result.Message);
         }

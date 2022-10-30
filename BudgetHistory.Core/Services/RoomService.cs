@@ -15,41 +15,46 @@ namespace BudgetHistory.Core.Services
 {
     public class RoomService : IRoomService
     {
-        private readonly IUnitOfWork unitOfWork;
-        private readonly IEncryptionDecryption encryptionDecryptionService;
-        private readonly IConfiguration configuration;
-        private readonly ITokenService tokenService;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IEncryptionDecryption _encryptionDecryptionService;
+        private readonly IConfiguration _configuration;
+        private readonly ITokenService _tokenService;
 
         //TODO impelement methods here
         public RoomService(IUnitOfWork unitOfWork, IEncryptionDecryption encryptionDecryptionService, IConfiguration configuration, ITokenService tokenService)
         {
-            this.unitOfWork = unitOfWork;
-            this.encryptionDecryptionService = encryptionDecryptionService;
-            this.configuration = configuration;
-            this.tokenService = tokenService;
+            _unitOfWork = unitOfWork;
+            _encryptionDecryptionService = encryptionDecryptionService;
+            _configuration = configuration;
+            _tokenService = tokenService;
         }
 
-        public Task<ServiceResponse<Room>> GetRoomById<T>(T roomId)
+        public async Task<ServiceResponse<Room>> GetRoomById<T>(T roomId)
         {
-            var room = unitOfWork.GetGenericRepository<Room>().GetQuery(room => room.Id.ToString() == roomId.ToString()).Include(room => room.Users).FirstOrDefault();
-
-            if (room == null)
+            return await Task.Run(() =>
             {
-                return Task.FromResult(new ServiceResponse<Room>() { IsSuccess = false, Message = $"Room \'{roomId}\' does not exist." });
-            }
+                var room = _unitOfWork.GetGenericRepository<Room>()
+                                     .GetQuery(room => room.Id.ToString() == roomId.ToString())
+                                     .Include(room => room.Users)
+                                     .FirstOrDefault();
 
-            room.DecryptValues(encryptionDecryptionService, configuration.GetSection(Constants.AppSettings.SecretKey).Value);
+                if (room == null)
+                {
+                    return ServiceResponse<Room>.Failure($"Room \'{roomId}\' does not exist.");
+                }
 
-            return Task.FromResult(new ServiceResponse<Room>() { IsSuccess = true, Value = room });
+                room.DecryptValues(_encryptionDecryptionService, _configuration.GetSection(Constants.AppSettings.SecretKey).Value);
+                return ServiceResponse<Room>.Success(room);
+            });
         }
 
         public async Task<ServiceResponse<string>> LogIn(string currentUserId, Guid roomId, string roomPassword)
         {
-            var result = await this.GetRoomById(roomId);
+            var result = await GetRoomById(roomId);
             if (!result.IsSuccess)
             {
                 var errorMessage = result.Message;
-                return new ServiceResponse<string>() { Message = errorMessage, IsSuccess = false };
+                return ServiceResponse<string>.Failure(errorMessage);
             }
             var room = result.Value;
 
@@ -57,41 +62,45 @@ namespace BudgetHistory.Core.Services
             {
                 var errorMessage = $"Wrong room password!";
                 //TODO: Add attempts handler/counter
-                return new ServiceResponse<string>() { Message = errorMessage, IsSuccess = false };
+                return ServiceResponse<string>.Failure(errorMessage);
             }
 
-            var token = this.tokenService.CreateRoomSessionToken(result.Value, currentUserId);
+            var token = _tokenService.CreateRoomSessionToken(result.Value, currentUserId);
 
-            return new ServiceResponse<string>() { IsSuccess = true, Value = token, Message = "Successful room login." };
+            return ServiceResponse<string>.Success(token);
         }
 
         public async Task<ServiceResponse> CreateRoom(Room newRoom, Guid userId)
         {
             newRoom.Id = Guid.NewGuid();
-            newRoom.DateOfCreation = DateTime.UtcNow;
-            newRoom.Password = encryptionDecryptionService.Encrypt(newRoom.Password, configuration.GetSection(Constants.AppSettings.SecretKey).Value);
+            newRoom.EncryptedPassword = _encryptionDecryptionService.Encrypt(newRoom.Password, _configuration.GetSection(Constants.AppSettings.SecretKey).Value);
 
-            var userRepository = unitOfWork.GetGenericRepository<User>();
+            var userRepository = _unitOfWork.GetGenericRepository<User>();
 
             var user = userRepository.GetQuery(u => u.AssociatedIdentityUserId == userId).Include(r => r.Rooms).FirstOrDefault();
             if (user is null)
             {
-                return new ServiceResponse() { IsSuccess = false, Message = "Creation failed. User does not exist." };
+                return ServiceResponse.Failure("Creation failed. User does not exist.");
             }
 
             newRoom.OwnerId = user.Id;
 
-            user.Rooms.Append(newRoom);
+            _ = user.Rooms.Append(newRoom);
             var isUserUpdated = userRepository.Update(user);
 
             newRoom.Users = new List<User>() { user };
 
-            var result = await unitOfWork.GetGenericRepository<Room>().Add(newRoom);
-            if (result && await unitOfWork.CompleteAsync())
-            {
-                return new ServiceResponse() { IsSuccess = true, Message = "Creation succeeded." };
-            }
-            return new ServiceResponse() { IsSuccess = false, Message = "Creation failed." };
+            var result = await _unitOfWork.GetGenericRepository<Room>().Add(newRoom);
+
+            return result && await _unitOfWork.CompleteAsync() ? ServiceResponse.Success("Creation succeeded.") : ServiceResponse.Failure("Creation failed.");
         }
+
+        public async Task<ServiceResponse<IEnumerable<Room>>> GetRoomsForUser(Guid userId)
+            => await Task.Run(() =>
+            {
+                var rooms = _unitOfWork.GetGenericRepository<Room>().GetQuery(r => r.Users.Select(u => u.AssociatedIdentityUserId).Contains(userId));
+
+                return rooms.Any() ? ServiceResponse<IEnumerable<Room>>.Success(rooms) : ServiceResponse<IEnumerable<Room>>.Failure($"There are no valid rooms for a particular user yet");
+            });
     }
 }
