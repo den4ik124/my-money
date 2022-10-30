@@ -22,8 +22,6 @@ namespace BudgetHistory.Application.Rooms.Queries
 
         public async Task<Result<RoomResponseDto>> Handle(GetRoomByIdQuery request, CancellationToken cancellationToken)
         {
-            //TODO разобраться с комнатами
-
             var roomResult = await _roomService.GetRoomById(request.RoomId);
 
             if (!roomResult.IsSuccess)

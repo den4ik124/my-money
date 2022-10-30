@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BudgetHistory.Logging
 {
-    public class TelegramLogger : ITgLogger
+    public class TelegramLogger : ICustomLogger
     {
         private readonly string _token;
         private readonly string _chatId;
