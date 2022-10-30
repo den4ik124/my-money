@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 
@@ -22,8 +21,8 @@ namespace BudgetHistory.API
             using var scope = builder.Services.CreateScope();
 
             var services = scope.ServiceProvider;
-            var logger = services.GetService<ILogger<Program>>();
-            var tgLogger = services.GetService<ITgLogger>();
+            var logger = services.GetService<ICustomLoggerFactory>()
+                                 .CreateLogger<Program>();
             try
             {
                 var dbContexts = new List<DbContext>()
@@ -39,8 +38,7 @@ namespace BudgetHistory.API
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occured during Migration.\n" + ex.Message);
-                tgLogger.LogError($"An error occured during Migration.\n{ex.Message}");
+                logger.LogError("An error occured during Migration.\n" + ex.Message).GetAwaiter().GetResult();
             }
             try
             {
@@ -51,8 +49,7 @@ namespace BudgetHistory.API
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occured during data seeding.\n" + ex.Message);
-                tgLogger.LogError($"An error occured during data seeding.\n{ex.Message}");
+                logger.LogError("An error occured during Seeding.\n" + ex.Message).GetAwaiter().GetResult();
             }
 
             builder.Run();

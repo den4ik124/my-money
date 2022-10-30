@@ -16,95 +16,96 @@ namespace BudgetHistory.Core.Services
 {
     public class NoteService : INoteService
     {
-        private readonly IUnitOfWork unitOfWork;
-        private readonly IMapper mapper;
-        private readonly IRoomService roomService;
-        private readonly IEncryptionDecryption encryptionDecryptionService;
-        private readonly IGenericRepository<Note> noteRepository;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
+        private readonly IRoomService _roomService;
+        private readonly IEncryptionDecryption _encryptionDecryptionService;
+        private readonly IGenericRepository<Note> _noteRepository;
 
         public NoteService(IUnitOfWork unitOfWork, IMapper mapper, IRoomService roomService, IEncryptionDecryption encryptionDecryption)
         {
-            this.unitOfWork = unitOfWork;
-            this.mapper = mapper;
-            this.roomService = roomService;
-            this.encryptionDecryptionService = encryptionDecryption;
-            this.noteRepository = unitOfWork.GetGenericRepository<Note>();
+            _unitOfWork = unitOfWork;
+            _mapper = mapper;
+            _roomService = roomService;
+            _encryptionDecryptionService = encryptionDecryption;
+            _noteRepository = unitOfWork.GetGenericRepository<Note>();
         }
 
-        public async Task<IEnumerable<Note>> GetAllNotes(Guid roomId, int pageNumber, int pageSize, Expression<Func<Note, bool>> predicate = null, Func<IQueryable<Note>, IOrderedQueryable<Note>> orderBy = null)
+        public async Task<ServiceResponse<IEnumerable<Note>>> GetAllNotes(Guid roomId, int pageNumber, int pageSize, Expression<Func<Note, bool>> predicate = null, Func<IQueryable<Note>, IOrderedQueryable<Note>> orderBy = null)
         {
             var notes = GetItemsFromQuery(pageNumber, pageSize, predicate, orderBy);
-            var room = (await roomService.GetRoomById(roomId)).Value;
+            var room = (await _roomService.GetRoomById(roomId))?.Value
+                ?? throw new ArgumentNullException($"Room Id: {roomId}", $"Room was not found");
 
             foreach (var note in notes)
             {
-                note.DecryptValues(encryptionDecryptionService, room.Password);
+                note.DecryptValues(_encryptionDecryptionService, room.Password);
             }
 
-            return notes.OrderBy(note => note.DateOfCreation);
+            return ServiceResponse<IEnumerable<Note>>.Success(notes.OrderBy(note => note.DateOfCreation));
         }
 
         public async Task<ServiceResponse<Note>> GetNoteById(Guid noteId)
         {
-            var note = noteRepository.GetQuery(note => note.Id == noteId).FirstOrDefault()
+            var note = _noteRepository.GetQuery(note => note.Id == noteId).FirstOrDefault()
                 ?? throw new ArgumentNullException($"Note (ID : {noteId}) does not exist");
 
-            var room = (await roomService.GetRoomById(note.RoomId)).Value;
+            var room = (await _roomService.GetRoomById(note.RoomId)).Value;
 
-            return new ServiceResponse<Note>() { IsSuccess = true, Value = note.DecryptValues(encryptionDecryptionService, room.Password) };
+            return ServiceResponse<Note>.Success(note.DecryptValues(_encryptionDecryptionService, room.Password));
         }
 
         public async Task<ServiceResponse> CreateNewNote(Note newNote, Currency currency, decimal value)
         {
-            var room = (await roomService.GetRoomById(newNote.RoomId)).Value;
+            var room = (await _roomService.GetRoomById(newNote.RoomId)).Value;
 
-            var lastNote = noteRepository.GetQuery(note => note.RoomId == newNote.RoomId
+            var lastNote = _noteRepository.GetQuery(note => note.RoomId == newNote.RoomId
                                      && note.Currency == currency,
                                      order => order.OrderBy(note => note.DateOfCreation))?.LastOrDefault();
             if (lastNote is not null)
             {
-                lastNote.DecryptValues(encryptionDecryptionService, room.Password);
+                lastNote.DecryptValues(_encryptionDecryptionService, room.Password);
                 newNote.Balance = lastNote.Balance + value;
             }
             else
             {
                 if (value < 0)
                 {
-                    return new ServiceResponse() { IsSuccess = false, Message = "Баланс не может иметь отрицательное значение!" };
+                    return ServiceResponse.Failure("Баланс не может иметь отрицательное значение!");
                 }
                 newNote.Balance = value;
             }
 
             newNote.Id = Guid.NewGuid();
-            newNote.EncryptValues(encryptionDecryptionService, room.Password);
+            newNote.EncryptValues(_encryptionDecryptionService, room.Password);
 
-            if (await noteRepository.Add(newNote))
+            if (await _noteRepository.Add(newNote))
             {
-                await this.unitOfWork.CompleteAsync();
-                return new ServiceResponse() { IsSuccess = true, Message = $"Note (id : {newNote.Id})\nhas been created successfully!" }; ;
+                await _unitOfWork.CompleteAsync();
+                return ServiceResponse.Success($"Note (id : {newNote.Id})\nhas been created successfully!");
             }
-            return new ServiceResponse() { IsSuccess = false, Message = "Note was not created." }; ;
+            return ServiceResponse.Failure("Note was not created.");
         }
 
         public async Task<ServiceResponse> DeleteNote(Guid noteId)
         {
-            return new ServiceResponse() { IsSuccess = false, Message = "Method not implemented properly." };
+            return ServiceResponse.Failure("Method not implemented properly.");
         }
 
         public async Task<ServiceResponse> UpdateNote(Note updatedNote)
         {
-            await this.unitOfWork.BeginTransactionAsync();
+            await _unitOfWork.BeginTransactionAsync();
 
-            var oldNote = await noteRepository.GetById(updatedNote.Id);
+            var oldNote = await _noteRepository.GetById(updatedNote.Id);
             if (oldNote is null)
             {
-                return new ServiceResponse() { IsSuccess = false, Message = $"Note (id : {updatedNote.Id}\nwas not found." };
+                return ServiceResponse.Failure($"Note (id : {updatedNote.Id}\nwas not found.");
             }
 
-            var room = (await roomService.GetRoomById(updatedNote.RoomId)).Value;
+            var room = (await _roomService.GetRoomById(updatedNote.RoomId)).Value;
 
-            oldNote.DecryptValues(encryptionDecryptionService, room.Password);
-            updatedNote.EncryptValues(encryptionDecryptionService, room.Password);
+            oldNote.DecryptValues(_encryptionDecryptionService, room.Password);
+            updatedNote.EncryptValues(_encryptionDecryptionService, room.Password);
 
             updatedNote.DateOfModification = DateTime.UtcNow;
             updatedNote.Balance = oldNote.Balance;
@@ -113,11 +114,11 @@ namespace BudgetHistory.Core.Services
                 && oldNote.IsDeleted == updatedNote.IsDeleted
                 && oldNote.Currency == updatedNote.Currency)
             {
-                this.mapper.Map(updatedNote, oldNote);
-                noteRepository.Update(oldNote);
-                this.unitOfWork.TransactionCommit();
-                await this.unitOfWork.CompleteAsync();
-                return new ServiceResponse() { IsSuccess = true, Message = $"Note (id : {updatedNote.Id}\nhas been updated successfully." };
+                _mapper.Map(updatedNote, oldNote);
+                _noteRepository.Update(oldNote);
+                _unitOfWork.TransactionCommit();
+                await _unitOfWork.CompleteAsync();
+                return ServiceResponse.Success($"Note (id : {updatedNote.Id}\nhas been updated successfully.");
             }
 
             try
@@ -126,23 +127,23 @@ namespace BudgetHistory.Core.Services
 
                 if (!notesToEdit.Any())
                 {
-                    this.unitOfWork.RollbackTransaction();
-                    return new ServiceResponse() { IsSuccess = false, Message = $"There are no notes to be updated." };
+                    _unitOfWork.RollbackTransaction();
+                    return ServiceResponse.Failure($"There are no notes to be updated.");
                 }
 
                 foreach (var note in notesToEdit)
                 {
-                    noteRepository.Update(note);
+                    _noteRepository.Update(note);
                 }
             }
             catch (NoteNegativeBalanceException ex)
             {
-                return new ServiceResponse() { IsSuccess = false, Message = ex.Message };
+                return ServiceResponse.Failure(ex.Message);
             }
 
-            this.unitOfWork.TransactionCommit();
-            await this.unitOfWork.CompleteAsync();
-            return new ServiceResponse() { IsSuccess = true, Message = $"Note (id : {updatedNote.Id}\nhas been updated successfully." };
+            _unitOfWork.TransactionCommit();
+            await _unitOfWork.CompleteAsync();
+            return ServiceResponse.Success($"Note (id : {updatedNote.Id}\nhas been updated successfully.");
         }
 
         private IEnumerable<Note> GetNotesWithUpdatedBalances(Note oldNote, Note updatedNote, string roomPassword)
@@ -157,7 +158,7 @@ namespace BudgetHistory.Core.Services
 
         private IEnumerable<Note> RecalculateNotesWithDifferentCurrencies(Note oldNote, Note updatedNote, string roomPassword)
         {
-            var currencyGroups = noteRepository.GetQuery(note => note.RoomId == updatedNote.RoomId
+            var currencyGroups = _noteRepository.GetQuery(note => note.RoomId == updatedNote.RoomId
                                                                           && note.DateOfCreation >= oldNote.DateOfCreation
                                                                           && !note.IsDeleted,
                                                          note => note.OrderBy(item => item.DateOfCreation))
@@ -168,7 +169,7 @@ namespace BudgetHistory.Core.Services
             {
                 foreach (var item in currencyGroup)
                 {
-                    item.DecryptValues(encryptionDecryptionService, roomPassword);
+                    item.DecryptValues(_encryptionDecryptionService, roomPassword);
                 }
             }
 
@@ -190,18 +191,18 @@ namespace BudgetHistory.Core.Services
             }
             else
             {
-                var lastNoteFromNewCurrencyGroup = noteRepository.GetQuery(note => note.RoomId == updatedNote.RoomId
+                var lastNoteFromNewCurrencyGroup = _noteRepository.GetQuery(note => note.RoomId == updatedNote.RoomId
                                                               && note.Currency == updatedNote.Currency
                                                               && !note.IsDeleted,
                                              note => note.OrderBy(item => item.DateOfCreation)).LastOrDefault();
                 if (lastNoteFromNewCurrencyGroup is not null)
                 {
-                    lastNoteFromNewCurrencyGroup.DecryptValues(encryptionDecryptionService, roomPassword);
+                    lastNoteFromNewCurrencyGroup.DecryptValues(_encryptionDecryptionService, roomPassword);
                     newGroupInitialBalance = lastNoteFromNewCurrencyGroup.Balance;
                 }
             }
 
-            var oldGroupFirstElement = oldCurrencyGroup.FirstOrDefault(); 
+            var oldGroupFirstElement = oldCurrencyGroup.FirstOrDefault();
             var oldGroupInitialBalance = oldGroupFirstElement is null ? 0 : oldGroupFirstElement.Balance - oldGroupFirstElement.Value;
 
             oldCurrencyGroup.Remove(oldNote);
@@ -210,7 +211,7 @@ namespace BudgetHistory.Core.Services
                 oldCurrencyGroup = RecalculateBalances(oldCurrencyGroup, oldGroupInitialBalance, roomPassword);
             }
 
-            this.mapper.Map(updatedNote, oldNote);
+            _mapper.Map(updatedNote, oldNote);
 
             newCurrencyGroup.Insert(0, oldNote);
 
@@ -221,23 +222,23 @@ namespace BudgetHistory.Core.Services
 
         private IEnumerable<Note> RecalculateNotesWithSameCurrency(Note oldNote, Note updatedNote, string roomPassword)
         {
-            var notesToUpdate = noteRepository.GetQuery(note => note.RoomId == updatedNote.RoomId
+            var notesToUpdate = _noteRepository.GetQuery(note => note.RoomId == updatedNote.RoomId
                                                      && note.DateOfCreation >= oldNote.DateOfCreation
                                                      && note.Currency == oldNote.Currency,
                                                      _ => _.OrderBy(note => note.DateOfCreation));
 
             foreach (var item in notesToUpdate)
             {
-                item.DecryptValues(encryptionDecryptionService, roomPassword);
+                item.DecryptValues(_encryptionDecryptionService, roomPassword);
             }
 
-            var firstNote = notesToUpdate.FirstOrDefault()?.DecryptValues(encryptionDecryptionService, roomPassword)
+            var firstNote = notesToUpdate.FirstOrDefault()?.DecryptValues(_encryptionDecryptionService, roomPassword)
                 ?? throw new Exception("В списке записей - нет записей! Проверь запрос и всё ли в порядке с записями в БД.");
 
             var groupInitialBalance = firstNote.Balance - firstNote.Value;
 
             updatedNote.DateOfCreation = oldNote.DateOfCreation;
-            this.mapper.Map(updatedNote, oldNote);
+            _mapper.Map(updatedNote, oldNote);
 
             return RecalculateBalances(notesToUpdate, groupInitialBalance, roomPassword);
         }
@@ -267,13 +268,12 @@ namespace BudgetHistory.Core.Services
                     }
                 }
 
-
-            if (note.Balance < 0)
+                if (note.Balance < 0)
                 {
                     throw new NoteNegativeBalanceException($"Изменение в записи (id:{note.Id})\nведет к отрицательному балансу в следующих записях. Проверьте валидность указанного значения.");
                 }
 
-                note.EncryptValues(encryptionDecryptionService, roomPassword);
+                note.EncryptValues(_encryptionDecryptionService, roomPassword);
             }
             return notes.ToList();
         }
@@ -285,11 +285,11 @@ namespace BudgetHistory.Core.Services
             var offset = (pageNumber - 1) * pageSize;
             if (predicate != null)
             {
-                return this.noteRepository.GetQuery(predicate, orderBy)
+                return _noteRepository.GetQuery(predicate, orderBy)
                            .Skip(offset)
                            .Take(pageSize);
             }
-            return this.noteRepository.GetQuery(null, orderBy)
+            return _noteRepository.GetQuery(null, orderBy)
                        .Skip(offset)
                        .Take(pageSize);
         }

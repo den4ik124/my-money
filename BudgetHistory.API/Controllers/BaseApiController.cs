@@ -9,9 +9,9 @@ namespace BudgetHistory.API.Controllers
     [Route("[controller]")]
     public class BaseApiController : ControllerBase
     {
-        private IMediator mediator;
+        private IMediator _mediator;
 
-        protected IMediator Mediator => this.mediator ??= HttpContext.RequestServices.GetService<IMediator>();
+        protected IMediator Mediator => _mediator ??= HttpContext.RequestServices.GetService<IMediator>();
 
         protected ActionResult HandleResult<T>(Result<T> result)
         {

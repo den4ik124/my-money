@@ -1,11 +1,6 @@
-﻿using System.Threading.Tasks;
-
-namespace BudgetHistory.Logging.Interfaces
+﻿namespace BudgetHistory.Logging.Interfaces
 {
-    public interface ITgLogger
+    public interface ITgLogger : ICustomLogger
     {
-        Task LogError(string errorMessage);
-
-        Task LogInfo(string infoMessage);
     }
 }

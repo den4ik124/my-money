@@ -11,20 +11,20 @@ namespace BudgetHistory.Application.Rooms.Commands
 {
     public class CreateNewRoomCommandHandler : IRequestHandler<CreateNewRoomCommand, Result<string>>
     {
-        private readonly IMapper mapper;
-        private readonly IRoomService roomService;
+        private readonly IMapper _mapper;
+        private readonly IRoomService _roomService;
 
         public CreateNewRoomCommandHandler(IMapper mapper, IRoomService roomService)
         {
-            this.mapper = mapper;
-            this.roomService = roomService;
+            _mapper = mapper;
+            _roomService = roomService;
         }
 
         public async Task<Result<string>> Handle(CreateNewRoomCommand request, CancellationToken cancellationToken)
         {
-            var room = mapper.Map<Room>(request.NewRoomDto);
+            var room = _mapper.Map<Room>(request.NewRoomDto);
 
-            var result = await roomService.CreateRoom(room, new Guid(request.UserId));
+            var result = await _roomService.CreateRoom(room, new Guid(request.UserId));
             return result.IsSuccess ? Result<string>.Success(result.Message) : Result<string>.Failure(result.Message);
         }
     }

@@ -4,12 +4,11 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BudgetHistory.Core.Models
 {
-    public class Room
+    public class Room : BaseEntity<Guid>
     {
-        public Guid Id { get; set; }
         public IEnumerable<User> Users { get; set; }
         public Guid OwnerId { get; set; }
-        public DateTime DateOfCreation { get; set; }
+        public DateTime DateOfCreation { get; set; } = DateTime.UtcNow;
         public string Name { get; set; }
 
         [NotMapped]

@@ -19,15 +19,15 @@ namespace BudgetHistory.Logging
 
         public async Task LogError(string errorMessage)
         {
-            await SendTelegramMessage($"‼️ {errorMessage}");
+            await SendTelegramMessageAsync($"‼️ {errorMessage}");
         }
 
         public async Task LogInfo(string infoMessage)
         {
-            await SendTelegramMessage($"⚠️ {infoMessage}");
+            await SendTelegramMessageAsync($"⚠️ {infoMessage}");
         }
 
-        private async Task SendTelegramMessage(string message)
+        private async Task SendTelegramMessageAsync(string message)
         {
             var requestUrl = new Uri($"https://api.telegram.org/bot{_token}/sendMessage?chat_id={_chatId}&text={message}");
             var client = new HttpClient();

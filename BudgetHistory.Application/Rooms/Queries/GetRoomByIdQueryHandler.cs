@@ -1,37 +1,43 @@
 ﻿using AutoMapper;
 using BudgetHistory.Application.Core;
 using BudgetHistory.Application.DTOs.Room;
-using BudgetHistory.Core.Interfaces.Repositories;
-using BudgetHistory.Core.Models;
+using BudgetHistory.Core.Extensions;
 using BudgetHistory.Core.Services.Interfaces;
 using MediatR;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace BudgetHistory.Application.Rooms.Queries
 {
-    public class GetRoomByIdQueryHandler : IRequestHandler<GetRoomByIdQuery, Result<IEnumerable<RoomResponseDto>>>
+    public class GetRoomByIdQueryHandler : IRequestHandler<GetRoomByIdQuery, Result<RoomResponseDto>>
     {
-        private readonly IUnitOfWork unitOfWork;
-        private readonly IMapper mapper;
-        private readonly IRoomService roomService;
+        private readonly IMapper _mapper;
+        private readonly IRoomService _roomService;
 
-        public GetRoomByIdQueryHandler(IUnitOfWork unitOfWork, IMapper mapper, IRoomService roomService)
+        public GetRoomByIdQueryHandler(IMapper mapper, IRoomService roomService)
         {
-            this.unitOfWork = unitOfWork;
-            this.mapper = mapper;
-            this.roomService = roomService;
+            _mapper = mapper;
+            _roomService = roomService;
         }
 
-        public Task<Result<IEnumerable<RoomResponseDto>>> Handle(GetRoomByIdQuery request, CancellationToken cancellationToken)
+        public async Task<Result<RoomResponseDto>> Handle(GetRoomByIdQuery request, CancellationToken cancellationToken)
         {
             //TODO разобраться с комнатами
-            var room = this.unitOfWork.GetGenericRepository<Room>().GetQuery(r => r.Id.ToString() == request.RoomId && r.Users.Select(u => u.Id.ToString()).Contains(request.UserId));
-            if (room == null) return Task.FromResult(Result<IEnumerable<RoomResponseDto>>.Failure("Room does not exist or user is not in the room users list."));
-            var roomsDto = this.mapper.Map<IEnumerable<RoomResponseDto>>(room);
-            return Task.FromResult(Result<IEnumerable<RoomResponseDto>>.Success(roomsDto));
+
+            var roomResult = await _roomService.GetRoomById(request.RoomId);
+
+            if (!roomResult.IsSuccess)
+            {
+                return Result<RoomResponseDto>.Failure(roomResult.Message);
+            }
+
+            if (roomResult.Value.IsUserAllowableToReadData(request.UserId))
+            {
+                return Result<RoomResponseDto>.Failure($"This user (id : {request.UserId}) can't get information from this room. Request access from room owner.");
+            }
+
+            var roomsDto = _mapper.Map<RoomResponseDto>(roomResult.Value);
+            return Result<RoomResponseDto>.Success(roomsDto);
         }
     }
 }

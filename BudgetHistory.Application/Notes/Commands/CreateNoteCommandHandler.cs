@@ -11,21 +11,21 @@ namespace BudgetHistory.Application.Notes.Commands
 {
     public class CreateNoteCommandHandler : IRequestHandler<CreateNoteCommand, Result<string>>
     {
-        private readonly IMapper mapper;
-        private readonly INoteService noteService;
+        private readonly IMapper _mapper;
+        private readonly INoteService _noteService;
 
         public CreateNoteCommandHandler(IMapper mapper, INoteService noteService)
         {
-            this.mapper = mapper;
-            this.noteService = noteService;
+            _mapper = mapper;
+            _noteService = noteService;
         }
 
         public async Task<Result<string>> Handle(CreateNoteCommand request, CancellationToken cancellationToken)
         {
-            var noteModel = this.mapper.Map<Note>(request.NoteDto);
+            var noteModel = _mapper.Map<Note>(request.NoteDto);
 
             var currencyEnum = Enum.Parse<Currency>(request.NoteDto.Currency);
-            var result = await noteService.CreateNewNote(noteModel, currencyEnum, request.NoteDto.Value);
+            var result = await _noteService.CreateNewNote(noteModel, currencyEnum, request.NoteDto.Value);
 
             return result.IsSuccess ? Result<string>.Success(result.Message) : Result<string>.Failure(result.Message);
         }

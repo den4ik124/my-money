@@ -26,6 +26,6 @@ namespace BudgetHistory.Core.Models
         public decimal Balance { get; set; }
 
         public string EncryptedBalance { get; set; }
-        public string Comment { get; set; }
+        public string Comment { get; set; } = String.Empty;
     }
 }

@@ -13,6 +13,6 @@ namespace BudgetHistory.Application.Core
         [Required]
         public int Size { get; set; } = 10;
 
-        public int TotalPagesCount { get => (int)Math.Ceiling(decimal.Divide(this.Items, this.Size)); }
+        public int TotalPagesCount { get => (int)Math.Ceiling(decimal.Divide(Items, Size)); }
     }
 }

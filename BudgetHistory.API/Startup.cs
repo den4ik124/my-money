@@ -1,7 +1,6 @@
 using BudgetHistory.API.Extensions;
 using BudgetHistory.API.Middleware;
 using BudgetHistory.Application.Notes.Validators;
-using BudgetHistory.Logging;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
@@ -26,10 +25,9 @@ namespace BudgetHistory.API
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddNotesServices(Configuration);
-            services.AddCustomServices(Configuration);
             services.AddIdentityServices(Configuration);
-
-            services.AddSingleton<BudgetHistory.Logging.Interfaces.ITgLogger, TelegramLogger>();
+            services.AddCustomServices();
+            services.AddCustomLoggers();
 
             services.AddAutoMapper(typeof(Startup));
 

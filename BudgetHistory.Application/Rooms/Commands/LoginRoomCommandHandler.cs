@@ -11,20 +11,16 @@ namespace BudgetHistory.Application.Rooms.Commands
 {
     public class LoginRoomCommandHandler : IRequestHandler<LoginRoomCommand, Result<string>>
     {
-        private readonly ITokenService tokenService;
-        private readonly IRoomService roomService;
+        private readonly IRoomService _roomService;
 
-        public LoginRoomCommandHandler(
-                                       ITokenService tokenService,
-                                       IRoomService roomService)
+        public LoginRoomCommandHandler(IRoomService roomService)
         {
-            this.tokenService = tokenService;
-            this.roomService = roomService;
+            _roomService = roomService;
         }
 
         public async Task<Result<string>> Handle(LoginRoomCommand request, CancellationToken cancellationToken)
         {
-            var result = await roomService.LogIn(request.CurrentUserId, new Guid(request.LoginRoomDto.RoomId), request.LoginRoomDto.RoomPassword);
+            var result = await _roomService.LogIn(request.CurrentUserId, new Guid(request.LoginRoomDto.RoomId), request.LoginRoomDto.RoomPassword);
 
             if (!result.IsSuccess)
             {
