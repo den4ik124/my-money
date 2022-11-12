@@ -8,6 +8,7 @@ using Shouldly;
 using System;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace BudgetHistory.Tests.HandlersTests.Notes
@@ -15,7 +16,7 @@ namespace BudgetHistory.Tests.HandlersTests.Notes
     public class CreateNoteCommandHandlerTest : NotesBaseTest
     {
         [Fact]
-        public async void CreateNoteCommandHandler_ShouldIncrease_NotesCount()
+        public async Task CreateNoteCommandHandler_ShouldIncrease_NotesCount()
         {
             RoomRepoMock.Setup(x => x.GetById(It.IsAny<Guid>())).ReturnsAsync((Guid id) =>
             {
@@ -25,7 +26,7 @@ namespace BudgetHistory.Tests.HandlersTests.Notes
             var itemsCountBefore = await NoteRepoMock.Object.GetItemsCount();
 
             var room = RoomRepoMock.Object.GetQuery().FirstOrDefault();
-            room.DecryptValues(EncryptionService, Configuration.GetSection(AppSettings.SecretKey).Value);
+            await room.DecryptValues(EncryptionService, Configuration.GetSection(AppSettings.SecretKey).Value);
 
             //Arrange
             var handler = new CreateNoteCommandHandler(Mapper, NoteService);

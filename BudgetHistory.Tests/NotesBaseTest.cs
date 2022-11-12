@@ -5,6 +5,7 @@ using BudgetHistory.Core.Interfaces.Repositories;
 using BudgetHistory.Core.Models;
 using BudgetHistory.Core.Services;
 using BudgetHistory.Core.Services.Interfaces;
+using BudgetHistory.Logging.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using System.IO;
@@ -21,9 +22,10 @@ namespace BudgetHistory.Tests
             });
             Mapper = mapperConfig.CreateMapper();
             UnitOfWorkMock = new Mock<IUnitOfWork>();
+            LoggerMock = new Mock<ICustomLoggerFactory>();
             UnitOfWorkMock.Setup(x => x.CompleteAsync()).ReturnsAsync(true);
             Configuration = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json").Build();
-            EncryptionService = new EncryptionDecryptionService();
+            EncryptionService = new EncryptionDecryptionService(LoggerMock.Object);
 
             var tokenServiceMock = new Mock<ITokenService>();
 
@@ -34,7 +36,7 @@ namespace BudgetHistory.Tests
             UnitOfWorkMock.Setup(x => x.GetGenericRepository<Room>()).Returns(RoomRepoMock.Object);
 
             RoomService = new RoomService(UnitOfWorkMock.Object, EncryptionService, Configuration, tokenServiceMock.Object);
-            NoteService = new NoteService(UnitOfWorkMock.Object, Mapper, RoomService, EncryptionService);
+            NoteService = new NoteService(UnitOfWorkMock.Object, Mapper, RoomService, EncryptionService, LoggerMock.Object);
         }
 
         public IRoomService RoomService { get; set; }
@@ -46,5 +48,7 @@ namespace BudgetHistory.Tests
         public Mock<IGenericRepository<Room>> RoomRepoMock { get; }
 
         public Mock<IUnitOfWork> UnitOfWorkMock;
+
+        public Mock<ICustomLoggerFactory> LoggerMock { get; }
     }
 }

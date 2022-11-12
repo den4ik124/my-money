@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using BudgetHistory.Core.Services.Responses;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using System.Threading.Tasks;
 
@@ -6,8 +7,8 @@ namespace BudgetHistory.Auth.Interfaces
 {
     public interface IAuthService
     {
-        Task<AuthResult> Authenticate(string userName, string password, HttpContext context);
+        Task<ServiceResponse> Authenticate(string userName, string password, HttpContext context);
 
-        Task<AuthResult> RegisterUser(IdentityUser identityUser, string password);
+        Task<ServiceResponse> RegisterUser(IdentityUser identityUser, string password);
     }
 }

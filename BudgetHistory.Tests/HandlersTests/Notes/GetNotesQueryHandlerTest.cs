@@ -9,6 +9,7 @@ using Shouldly;
 using System;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace BudgetHistory.Tests.HandlersTests.Notes
@@ -26,19 +27,19 @@ namespace BudgetHistory.Tests.HandlersTests.Notes
         [Theory]
         [InlineData(1)]
         [InlineData(2)]
-        public async void GetNotesQueryHandler_ShouldReturn_ListOfMockedNotes(int size)
+        public async Task GetNotesQueryHandler_ShouldReturn_ListOfMockedNotes(int size)
         {
             var tokenServiceMock = new Mock<ITokenService>();
 
-            var room = RoomRepoMock.Object.GetQuery().FirstOrDefault().DecryptValues(EncryptionService, Configuration.GetSection(AppSettings.SecretKey).Value);
+            var room = await RoomRepoMock.Object.GetQuery().FirstOrDefault().DecryptValues(EncryptionService, Configuration.GetSection(AppSettings.SecretKey).Value);
             var roomService = new RoomService(UnitOfWorkMock.Object, EncryptionService, Configuration, tokenServiceMock.Object);
             foreach (var note in NoteRepoMock.Object.GetAll().Result)
             {
-                note.EncryptedValue = EncryptionService.Encrypt(note.Value.ToString(), room.Password);
-                note.EncryptedBalance = EncryptionService.Encrypt(note.Balance.ToString(), room.Password);
+                note.EncryptedValue = await EncryptionService.Encrypt(note.Value.ToString(), room.Password);
+                note.EncryptedBalance = await EncryptionService.Encrypt(note.Balance.ToString(), room.Password);
             }
 
-            var noteService = new NoteService(UnitOfWorkMock.Object, Mapper, roomService, EncryptionService);
+            var noteService = new NoteService(UnitOfWorkMock.Object, Mapper, roomService, EncryptionService, LoggerMock.Object);
             //Arrange
             var handler = new GetNotesQueryHandler(UnitOfWorkMock.Object, Mapper, noteService);
             var pageParameters = new PagingFilteringDto()

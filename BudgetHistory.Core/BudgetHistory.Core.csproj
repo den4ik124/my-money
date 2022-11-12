@@ -10,4 +10,8 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.7.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\BudgetHistory.Logging\BudgetHistory.Logging.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -31,7 +31,7 @@ namespace BudgetHistory.Core.Services
 
         public async Task<ServiceResponse<Room>> GetRoomById<T>(T roomId)
         {
-            return await Task.Run(() =>
+            return await Task.Run(async () =>
             {
                 var room = _unitOfWork.GetGenericRepository<Room>()
                                      .GetQuery(room => room.Id.ToString() == roomId.ToString())
@@ -43,7 +43,7 @@ namespace BudgetHistory.Core.Services
                     return ServiceResponse<Room>.Failure($"Room \'{roomId}\' does not exist.");
                 }
 
-                room.DecryptValues(_encryptionDecryptionService, _configuration.GetSection(Constants.AppSettings.SecretKey).Value);
+                await room.DecryptValues(_encryptionDecryptionService, _configuration.GetSection(Constants.AppSettings.SecretKey).Value);
                 return ServiceResponse<Room>.Success(room);
             });
         }
@@ -73,7 +73,7 @@ namespace BudgetHistory.Core.Services
         public async Task<ServiceResponse> CreateRoom(Room newRoom, Guid userId)
         {
             newRoom.Id = Guid.NewGuid();
-            newRoom.EncryptedPassword = _encryptionDecryptionService.Encrypt(newRoom.Password, _configuration.GetSection(Constants.AppSettings.SecretKey).Value);
+            newRoom.EncryptedPassword = await _encryptionDecryptionService.Encrypt(newRoom.Password, _configuration.GetSection(Constants.AppSettings.SecretKey).Value);
 
             var userRepository = _unitOfWork.GetGenericRepository<User>();
 
