@@ -4,7 +4,9 @@ using BudgetHistory.Core.AppSettings;
 using BudgetHistory.Core.Constants;
 using BudgetHistory.Core.Interfaces.Repositories;
 using BudgetHistory.Core.Models;
+using BudgetHistory.Core.Services;
 using BudgetHistory.Core.Services.Interfaces;
+using BudgetHistory.Core.Services.Responses;
 using BudgetHistory.Logging;
 using BudgetHistory.Logging.Interfaces;
 using Microsoft.AspNetCore.Http;
@@ -16,14 +18,14 @@ using System.Threading.Tasks;
 
 namespace BudgetHistory.Auth
 {
-    public class AuthService : IAuthService
+    public class AuthService : BaseService, IAuthService
     {
         private readonly IMapper _mapper;
         private readonly ITokenService _tokenService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly SignInManager<IdentityUser> _signInManager;
-        private readonly CustomLogger _log;
+        private readonly CustomLogger _logger;
         private readonly AuthTokenParameters _authTokenParameters;
 
         public AuthService(UserManager<IdentityUser> userManager,
@@ -40,10 +42,10 @@ namespace BudgetHistory.Auth
             _tokenService = tokenService;
             _unitOfWork = unitOfWork;
             _authTokenParameters = authParams.Value;
-            _log = logFactory.CreateLogger<AuthService>();
+            _logger = logFactory.CreateLogger<AuthService>();
         }
 
-        public async Task<AuthResult> Authenticate(string userName, string password, HttpContext context)
+        public async Task<ServiceResponse> Authenticate(string userName, string password, HttpContext context)
         {
             try
             {
@@ -51,9 +53,7 @@ namespace BudgetHistory.Auth
 
                 if (userFromDB == null)
                 {
-                    var errorMessage = $"User \"{userName}\" was not found.";
-                    await _log.LogError(errorMessage);
-                    return new AuthResult() { IsSuccess = false, Message = errorMessage };
+                    return await Failed(_logger, $"User \"{userName}\" was not found.");
                 }
 
                 var result = await _signInManager.CheckPasswordSignInAsync(userFromDB, password, false);
@@ -68,43 +68,38 @@ namespace BudgetHistory.Auth
                         SameSite = SameSiteMode.None,
                         Secure = true,
                     });
-                    return new AuthResult() { IsSuccess = true, Message = "Successful login." };
+                    return ServiceResponse.Success("Successful login.");
                 }
             }
             catch (Exception ex)
             {
                 var errorMessage = $"Method :{nameof(Authenticate)} has failed.\n{ex.Message}";
-                await _log.LogError(errorMessage);
+                await _logger.LogError(errorMessage);
             }
-            return new AuthResult() { IsSuccess = false, Message = "Incorrect password." };
+
+            return await Failed(_logger, "Incorrect password.");
         }
 
-        public async Task<AuthResult> RegisterUser(IdentityUser identityUser, string password)
+        public async Task<ServiceResponse> RegisterUser(IdentityUser identityUser, string password)
         {
             var errorMessage = string.Empty;
             var user = _mapper.Map<User>(identityUser);
             var result = await _userManager.CreateAsync(identityUser, password);
             if (!result.Succeeded)
             {
-                errorMessage = string.Join("|", result.Errors.Select(e => e.Description));
-                await _log.LogError(errorMessage);
-                return new AuthResult() { IsSuccess = result.Succeeded, Message = errorMessage };
+                return await Failed(_logger, string.Join("|", result.Errors.Select(e => e.Description)));
             }
 
             var userFromDb = await _userManager.FindByNameAsync(identityUser.UserName);
             if (userFromDb == null)
             {
-                errorMessage = $"User ({identityUser.UserName}) does not exist yet.";
-                await _log.LogError(errorMessage);
-                return new AuthResult() { IsSuccess = false, Message = errorMessage };
+                return await Failed(_logger, $"User ({identityUser.UserName}) does not exist yet.");
             }
 
             var addToRoleResult = await _userManager.AddToRoleAsync(userFromDb, nameof(Roles.Customer));
             if (!addToRoleResult.Succeeded)
             {
-                errorMessage = string.Join('|', addToRoleResult.Errors.Select(e => e.Description));
-                await _log.LogError(errorMessage);
-                return new AuthResult() { IsSuccess = false, Message = errorMessage };
+                return await Failed(_logger, string.Join('|', addToRoleResult.Errors.Select(e => e.Description)));
             }
 
             user.Id = Guid.NewGuid();
@@ -113,12 +108,9 @@ namespace BudgetHistory.Auth
             if (await _unitOfWork.GetGenericRepository<User>().Add(user))
             {
                 await _unitOfWork.CompleteAsync();
-                return new AuthResult() { IsSuccess = result.Succeeded, Message = $"\"{identityUser.UserName}\" has been successfully registered." };
+                return ServiceResponse.Success($"\"{identityUser.UserName}\" has been successfully registered.");
             }
-
-            errorMessage = $"User ({identityUser.UserName}) can't be registered.";
-            await _log.LogError(errorMessage);
-            return new AuthResult() { IsSuccess = false, Message = errorMessage };
+            return await Failed(_logger, $"User ({identityUser.UserName}) can't be registered.");
         }
     }
 }

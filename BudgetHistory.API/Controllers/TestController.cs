@@ -46,7 +46,7 @@ namespace BudgetHistory.API.Controllers
                 var notesInGroup = currencyGroup.ToArray();
                 for (int i = 0; i < itemsCount; i++)
                 {
-                    notesInGroup[i].DecryptValues(_encryptionDecryptionService, room.Password);
+                    await notesInGroup[i].DecryptValues(_encryptionDecryptionService, room.Password);
                     if (i == 0)
                     {
                         notesInGroup[i].Balance = notesInGroup[i].Value;
@@ -55,7 +55,7 @@ namespace BudgetHistory.API.Controllers
                     {
                         notesInGroup[i].Balance = notesInGroup[i - 1].Balance + notesInGroup[i].Value;
                     }
-                    notesInGroup[i].EncryptValues(_encryptionDecryptionService, room.Password);
+                    await notesInGroup[i].EncryptValues(_encryptionDecryptionService, room.Password);
                 }
 
                 joinedList.AddRange(notesInGroup);

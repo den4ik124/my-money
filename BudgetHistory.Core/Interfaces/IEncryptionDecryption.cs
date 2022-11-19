@@ -1,11 +1,13 @@
-﻿namespace BudgetHistory.Core.Interfaces
+﻿using System.Threading.Tasks;
+
+namespace BudgetHistory.Core.Interfaces
 {
     public interface IEncryptionDecryption
     {
-        string Encrypt<T>(T data, string secretKey);
+        Task<string> Encrypt<T>(T data, string secretKey);
 
-        string Decrypt(string encryptedData, string secretKey);
+        Task<string> Decrypt(string encryptedData, string secretKey);
 
-        public decimal DecryptToDecimal(string encryptedDecimal, string secretKey);
+        Task<decimal> DecryptToDecimal(string encryptedDecimal, string secretKey);
     }
 }

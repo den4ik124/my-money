@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace BudgetHistory.Tests.HandlersTests.Notes
@@ -16,9 +17,9 @@ namespace BudgetHistory.Tests.HandlersTests.Notes
     public class EditNoteCommandHandlerTest : NotesBaseTest
     {
         [Fact]
-        public async void EditNoteCommandHandler_ShouldUpdate_NoteData()
+        public async Task EditNoteCommandHandler_ShouldUpdate_NoteData()
         {
-            var room = RoomRepoMock.Object.GetQuery().FirstOrDefault().DecryptValues(EncryptionService, Configuration.GetSection(AppSettings.SecretKey).Value);
+            var room = await RoomRepoMock.Object.GetQuery().FirstOrDefault().DecryptValues(EncryptionService, Configuration.GetSection(AppSettings.SecretKey).Value);
 
             var items = new List<Note>()
             {
@@ -40,7 +41,7 @@ namespace BudgetHistory.Tests.HandlersTests.Notes
             };
             foreach (var item in items)
             {
-                item.EncryptValues(EncryptionService, room.Password);
+                await item.EncryptValues(EncryptionService, room.Password);
             }
 
             NoteRepoMock.Setup(rep => rep.Update(It.IsAny<Note>())).Returns((Note updatedItem) =>

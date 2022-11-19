@@ -1,21 +1,22 @@
 ﻿using BudgetHistory.Core.Interfaces;
 using BudgetHistory.Core.Models;
+using System.Threading.Tasks;
 
 namespace BudgetHistory.Core.Extensions
 {
     public static class NoteExtensions
     {
-        public static Note EncryptValues(this Note note, IEncryptionDecryption encryptionDecryptionService, string secretKey)
+        public static async Task<Note> EncryptValues(this Note note, IEncryptionDecryption encryptionDecryptionService, string secretKey)
         {
-            note.EncryptedValue = encryptionDecryptionService.Encrypt(note.Value, secretKey);
-            note.EncryptedBalance = encryptionDecryptionService.Encrypt(note.Balance, secretKey);
+            note.EncryptedValue = await encryptionDecryptionService.Encrypt(note.Value, secretKey);
+            note.EncryptedBalance = await encryptionDecryptionService.Encrypt(note.Balance, secretKey);
             return note;
         }
 
-        public static Note DecryptValues(this Note note, IEncryptionDecryption encryptionDecryptionService, string secretKey)
+        public static async Task<Note> DecryptValues(this Note note, IEncryptionDecryption encryptionDecryptionService, string secretKey)
         {
-            note.Value = encryptionDecryptionService.DecryptToDecimal(note.EncryptedValue, secretKey);
-            note.Balance = encryptionDecryptionService.DecryptToDecimal(note.EncryptedBalance, secretKey);
+            note.Value = await encryptionDecryptionService.DecryptToDecimal(note.EncryptedValue, secretKey);
+            note.Balance = await encryptionDecryptionService.DecryptToDecimal(note.EncryptedBalance, secretKey);
             return note;
         }
     }
