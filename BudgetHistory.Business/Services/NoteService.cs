@@ -101,8 +101,8 @@ namespace BudgetHistory.Business.Services
 
         public async Task<ServiceResponse> DeleteNote(Guid noteId)
         {
-            return ServiceResponse.Failure("Method not implemented properly.");
-            //return await base.Failed(_logger, "Method not implemented properly.");
+            //return ServiceResponse.Failure("Method not implemented properly.");
+            return await base.Failed(_logger, "Method not implemented properly.");
         }
 
         public async Task<ServiceResponse> UpdateNote(Note updatedNote)
