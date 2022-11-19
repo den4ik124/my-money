@@ -1,4 +1,4 @@
-﻿using BudgetHistory.Core.Interfaces;
+﻿using BudgetHistory.Abstractions.Interfaces;
 using BudgetHistory.Logging;
 using BudgetHistory.Logging.Interfaces;
 using System;
@@ -7,7 +7,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BudgetHistory.Core.Services
+namespace BudgetHistory.Business.Services
 {
     public class EncryptionDecryptionService : IEncryptionDecryption
     {

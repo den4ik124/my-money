@@ -1,5 +1,5 @@
-﻿using BudgetHistory.Core.Constants;
-using BudgetHistory.Core.Interfaces.Repositories;
+﻿using BudgetHistory.Abstractions.Interfaces.Data;
+using BudgetHistory.Core.Constants;
 using BudgetHistory.Core.Models;
 using BudgetHistory.Data.Seed.Interfaces;
 using Microsoft.AspNetCore.Identity;

@@ -1,4 +1,4 @@
-﻿using BudgetHistory.Core.Interfaces.Repositories;
+﻿using BudgetHistory.Abstractions.Interfaces.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;

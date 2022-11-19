@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace BudgetHistory.Core.Interfaces
+namespace BudgetHistory.Abstractions.Interfaces
 {
     public interface IEncryptionDecryption
     {

@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace BudgetHistory.Core.Interfaces.Repositories
+namespace BudgetHistory.Abstractions.Interfaces.Data
 {
     public interface IUnitOfWork : ITransaction
     {

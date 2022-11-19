@@ -1,7 +1,7 @@
-﻿using BudgetHistory.Core.Interfaces;
-using BudgetHistory.Core.Interfaces.Repositories;
-using BudgetHistory.Core.Services;
-using BudgetHistory.Core.Services.Interfaces;
+﻿using BudgetHistory.Abstractions.Interfaces;
+using BudgetHistory.Abstractions.Interfaces.Data;
+using BudgetHistory.Abstractions.Services;
+using BudgetHistory.Business.Services;
 using BudgetHistory.Data.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 

@@ -1,6 +1,6 @@
-﻿using BudgetHistory.Application.Core;
+﻿using BudgetHistory.Abstractions.Services;
+using BudgetHistory.Application.Core;
 using BudgetHistory.Core.Constants;
-using BudgetHistory.Core.Services.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using System;

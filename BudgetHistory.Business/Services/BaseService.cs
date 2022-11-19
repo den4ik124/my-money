@@ -2,7 +2,7 @@
 using BudgetHistory.Logging;
 using System.Threading.Tasks;
 
-namespace BudgetHistory.Core.Services
+namespace BudgetHistory.Business.Services
 {
     public class BaseService
     {

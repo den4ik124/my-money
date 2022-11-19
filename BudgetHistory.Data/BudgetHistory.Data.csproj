@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\BudgetHistory.Abstractions\BudgetHistory.Abstractions.csproj" />
     <ProjectReference Include="..\BudgetHistory.Core\BudgetHistory.Core.csproj" />
   </ItemGroup>
 

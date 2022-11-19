@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
+using BudgetHistory.Abstractions.Services;
 using BudgetHistory.Application.Core;
 using BudgetHistory.Application.DTOs.Note;
-using BudgetHistory.Core.Services.Interfaces;
 using MediatR;
 using System;
 using System.Threading;
