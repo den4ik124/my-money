@@ -1,0 +1,85 @@
+# ASP.NET
+# Build and test ASP.NET projects.
+# Add steps that publish symbols, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/apps/aspnet/build-aspnet-4
+
+variables:
+- group : connection-strings
+- group : secrets
+- name: BuildParameters.RestoreBuildProjects
+  value: '**/BudgetHistory.API.csproj'
+- name: BuildParameters.TestProjects
+  value: '**/*[Tt]ests/*.csproj'
+name: $(date:yyyyMMdd)$(rev:.r)
+trigger:
+- master
+jobs:
+- job: Job_1
+  displayName: Build project, check tests and prepare artifacts
+  pool:
+    vmImage: ubuntu-22.04
+  steps:
+  - checkout: self
+
+  # - task: FileTransform@1
+  #   displayName: "Variables substitution"
+  #   inputs:
+  #     folderPath: '$(System.DefaultWorkingDirectory)/**/*.zip' 
+  #     fileType: 'json'
+  #     targetFiles: '**/appsettings.json'
+  
+  - task: UseDotNet@2
+    displayName: 'Use .NET Core sdk 5.x'
+    inputs:
+      version: 5.x
+    
+  - task: DotNetCoreCLI@2
+    displayName: Restore
+    inputs:
+      command: restore
+      projects: $(BuildParameters.RestoreBuildProjects)
+
+  - task: DotNetCoreCLI@2
+    displayName: Build
+    inputs:
+      projects: $(BuildParameters.RestoreBuildProjects)
+      arguments: --configuration $(BuildConfiguration)
+      
+  # - task: replacetokens@5
+  #   inputs:
+  #     rootDirectory: '$(Pipeline.Workspace)/BudgetHistory'
+  #     targetFiles: '**/appsettings.json'
+  #     encoding: 'auto'
+  #     tokenPattern: 'default'
+  #     writeBOM: false
+  #     escapeType: 'none'
+  #     actionOnMissing: 'warn'
+  #     keepToken: false
+  #     actionOnNoFiles: 'continue'
+  #     enableTransforms: true
+  #     enableRecursion: false
+  #     useLegacyPattern: false
+  #     enableTelemetry: false
+
+  - task: DotNetCoreCLI@2
+    displayName: Test
+    inputs:
+      command: test
+      projects: $(BuildParameters.TestProjects)
+      arguments: --configuration $(BuildConfiguration)
+  - task: DotNetCoreCLI@2
+    displayName: Publish
+    inputs:
+      command: publish
+      publishWebProjects: True
+      projects: $(BuildParameters.RestoreBuildProjects)
+      arguments: --configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)
+      zipAfterPublish: True
+  - task: PublishBuildArtifacts@1
+    displayName: Publish Artifact
+    condition: succeededOrFailed()
+    inputs:
+      PathtoPublish: $(build.artifactstagingdirectory)
+      TargetPath: '\\my\share\$(Build.DefinitionName)\$(Build.BuildNumber)'
+...
+
