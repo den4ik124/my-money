@@ -4,10 +4,10 @@
 # https://docs.microsoft.com/azure/devops/pipelines/apps/aspnet/build-aspnet-4
 
 variables:
-- group : connection-strings
-- group : secrets
-- name: BuildParameters.RestoreBuildProjects
-  value: '**/BudgetHistory.API.csproj'
+# - group : connection-strings
+# - group : secrets
+# - name: BuildParameters.RestoreBuildProjects
+#   value: '**/BudgetHistory.API.csproj'
 - name: BuildParameters.TestProjects
   value: '**/*[Tt]ests/*.csproj'
 name: $(date:yyyyMMdd)$(rev:.r)
@@ -21,22 +21,22 @@ jobs:
   steps:
   - checkout: self
   
-  - task: UseDotNet@2
-    displayName: 'Use .NET Core sdk 5.x'
-    inputs:
-      version: 5.x
+  # - task: UseDotNet@2
+  #   displayName: 'Use .NET Core sdk 5.x'
+  #   inputs:
+  #     version: 5.x
     
-  - task: DotNetCoreCLI@2
-    displayName: Restore
-    inputs:
-      command: restore
-      projects: $(BuildParameters.RestoreBuildProjects)
+  # - task: DotNetCoreCLI@2
+  #   displayName: Restore
+  #   inputs:
+  #     command: restore
+  #     projects: $(BuildParameters.RestoreBuildProjects)
 
-  - task: DotNetCoreCLI@2
-    displayName: Build
-    inputs:
-      projects: $(BuildParameters.RestoreBuildProjects)
-      arguments: --configuration $(BuildConfiguration)
+  # - task: DotNetCoreCLI@2
+  #   displayName: Build
+  #   inputs:
+  #     projects: $(BuildParameters.RestoreBuildProjects)
+  #     arguments: --configuration $(BuildConfiguration)
       
 
   - task: DotNetCoreCLI@2
