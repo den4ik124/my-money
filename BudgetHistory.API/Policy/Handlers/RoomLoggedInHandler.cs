@@ -1,7 +1,7 @@
-﻿using BudgetHistory.Core.Constants;
-using BudgetHistory.Core.Interfaces.Repositories;
+﻿using BudgetHistory.Abstractions.Interfaces.Data;
+using BudgetHistory.Abstractions.Services;
+using BudgetHistory.Core.Constants;
 using BudgetHistory.Core.Models;
-using BudgetHistory.Core.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;

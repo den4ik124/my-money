@@ -1,9 +1,10 @@
 ﻿using AutoMapper;
+using BudgetHistory.Abstractions.Interfaces;
+using BudgetHistory.Abstractions.Interfaces.Data;
+using BudgetHistory.Abstractions.Services;
+using BudgetHistory.Core;
 using BudgetHistory.Core.Extensions;
-using BudgetHistory.Core.Interfaces;
-using BudgetHistory.Core.Interfaces.Repositories;
 using BudgetHistory.Core.Models;
-using BudgetHistory.Core.Services.Interfaces;
 using BudgetHistory.Core.Services.Responses;
 using BudgetHistory.Logging;
 using BudgetHistory.Logging.Interfaces;
@@ -14,7 +15,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
-namespace BudgetHistory.Core.Services
+namespace BudgetHistory.Business.Services
 {
     public class NoteService : BaseService, INoteService
     {
@@ -301,6 +302,31 @@ namespace BudgetHistory.Core.Services
             return _noteRepository.GetQuery(null, orderBy)
                        .Skip(offset)
                        .Take(pageSize);
+        }
+
+        Task<Core.Services.Responses.ServiceResponse<Note>> INoteService.GetNoteById(Guid noteId)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<Core.Services.Responses.ServiceResponse<IEnumerable<Note>>> INoteService.GetAllNotes(Guid roomId, int pageNumber, int pageSize, Expression<Func<Note, bool>> predicate, Func<IQueryable<Note>, IOrderedQueryable<Note>> orderBy)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<Core.Services.Responses.ServiceResponse> INoteService.CreateNewNote(Note newNote, Currency currency, decimal value)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<Core.Services.Responses.ServiceResponse> INoteService.UpdateNote(Note updatedNote)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<Core.Services.Responses.ServiceResponse> INoteService.DeleteNote(Guid noteId)
+        {
+            throw new NotImplementedException();
         }
     }
 }

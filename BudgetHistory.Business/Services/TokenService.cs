@@ -1,7 +1,7 @@
-﻿using BudgetHistory.Core.AppSettings;
+﻿using BudgetHistory.Abstractions.Services;
+using BudgetHistory.Core.AppSettings;
 using BudgetHistory.Core.Constants;
 using BudgetHistory.Core.Models;
-using BudgetHistory.Core.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -13,7 +13,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BudgetHistory.Core.Services
+namespace BudgetHistory.Business.Services
 {
     public class TokenService : BaseService, ITokenService
     {

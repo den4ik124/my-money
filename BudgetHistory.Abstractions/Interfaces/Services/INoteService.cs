@@ -6,7 +6,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
-namespace BudgetHistory.Core.Services.Interfaces
+namespace BudgetHistory.Abstractions.Services
 {
     public interface INoteService
     {

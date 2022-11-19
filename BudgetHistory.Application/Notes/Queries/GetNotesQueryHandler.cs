@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
+using BudgetHistory.Abstractions.Interfaces.Data;
+using BudgetHistory.Abstractions.Services;
 using BudgetHistory.Application.Core;
 using BudgetHistory.Application.DTOs.Note;
-using BudgetHistory.Core.Interfaces.Repositories;
 using BudgetHistory.Core.Models;
-using BudgetHistory.Core.Services.Interfaces;
 using MediatR;
 using System.Collections.Generic;
 using System.Threading;

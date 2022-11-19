@@ -1,4 +1,4 @@
-﻿using BudgetHistory.Core.Interfaces.Repositories;
+﻿using BudgetHistory.Abstractions.Interfaces.Data;
 using Microsoft.Extensions.Configuration;
 using System;
 

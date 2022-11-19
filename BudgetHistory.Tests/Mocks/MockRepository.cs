@@ -1,4 +1,4 @@
-﻿using BudgetHistory.Core.Interfaces.Repositories;
+﻿using BudgetHistory.Abstractions.Interfaces.Data;
 using BudgetHistory.Core.Models;
 using Moq;
 using System;

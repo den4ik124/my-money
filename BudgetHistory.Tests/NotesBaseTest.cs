@@ -1,10 +1,10 @@
 using AutoMapper;
+using BudgetHistory.Abstractions.Interfaces;
+using BudgetHistory.Abstractions.Interfaces.Data;
+using BudgetHistory.Abstractions.Services;
 using BudgetHistory.API.Mappings;
-using BudgetHistory.Core.Interfaces;
-using BudgetHistory.Core.Interfaces.Repositories;
+using BudgetHistory.Business.Services;
 using BudgetHistory.Core.Models;
-using BudgetHistory.Core.Services;
-using BudgetHistory.Core.Services.Interfaces;
 using BudgetHistory.Logging.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Moq;

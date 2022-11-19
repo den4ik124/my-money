@@ -1,5 +1,4 @@
-﻿using BudgetHistory.Core.Interfaces;
-using System;
+﻿using System;
 
 namespace BudgetHistory.Core.Models
 {

@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
+using BudgetHistory.Abstractions.Services;
 using BudgetHistory.Application.Core;
 using BudgetHistory.Application.DTOs.Room;
 using BudgetHistory.Core.Extensions;
-using BudgetHistory.Core.Services.Interfaces;
 using MediatR;
 using System.Threading;
 using System.Threading.Tasks;

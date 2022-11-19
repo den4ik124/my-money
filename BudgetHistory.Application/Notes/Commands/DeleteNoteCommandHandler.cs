@@ -1,6 +1,6 @@
-﻿using BudgetHistory.Application.Core;
-using BudgetHistory.Core.Interfaces.Repositories;
-using BudgetHistory.Core.Services.Interfaces;
+﻿using BudgetHistory.Abstractions.Interfaces.Data;
+using BudgetHistory.Abstractions.Services;
+using BudgetHistory.Application.Core;
 using MediatR;
 using System.Threading;
 using System.Threading.Tasks;

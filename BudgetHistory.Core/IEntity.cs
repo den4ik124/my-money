@@ -1,4 +1,4 @@
-﻿namespace BudgetHistory.Core.Interfaces
+﻿namespace BudgetHistory.Core
 {
     public interface IEntity
     {

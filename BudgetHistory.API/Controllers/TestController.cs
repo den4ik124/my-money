@@ -1,8 +1,8 @@
-﻿using BudgetHistory.Core.Extensions;
-using BudgetHistory.Core.Interfaces;
-using BudgetHistory.Core.Interfaces.Repositories;
+﻿using BudgetHistory.Abstractions.Interfaces;
+using BudgetHistory.Abstractions.Interfaces.Data;
+using BudgetHistory.Abstractions.Services;
+using BudgetHistory.Core.Extensions;
 using BudgetHistory.Core.Models;
-using BudgetHistory.Core.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;

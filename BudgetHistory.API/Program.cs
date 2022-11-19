@@ -1,4 +1,4 @@
-﻿using BudgetHistory.Core.Interfaces.Repositories;
+﻿using BudgetHistory.Abstractions.Interfaces.Data;
 using BudgetHistory.Data;
 using BudgetHistory.Data.Seed.Interfaces;
 using BudgetHistory.Logging.Interfaces;

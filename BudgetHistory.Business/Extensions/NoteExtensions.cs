@@ -1,4 +1,4 @@
-﻿using BudgetHistory.Core.Interfaces;
+﻿using BudgetHistory.Abstractions.Interfaces;
 using BudgetHistory.Core.Models;
 using System.Threading.Tasks;
 

@@ -1,8 +1,9 @@
-﻿using BudgetHistory.Core.Extensions;
-using BudgetHistory.Core.Interfaces;
-using BudgetHistory.Core.Interfaces.Repositories;
+﻿using BudgetHistory.Abstractions.Interfaces;
+using BudgetHistory.Abstractions.Interfaces.Data;
+using BudgetHistory.Abstractions.Services;
+using BudgetHistory.Core.Constants;
+using BudgetHistory.Core.Extensions;
 using BudgetHistory.Core.Models;
-using BudgetHistory.Core.Services.Interfaces;
 using BudgetHistory.Core.Services.Responses;
 using BudgetHistory.Logging;
 using BudgetHistory.Logging.Interfaces;
@@ -13,7 +14,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace BudgetHistory.Core.Services
+namespace BudgetHistory.Business.Services
 {
     public class RoomService : BaseService, IRoomService
     {
@@ -47,7 +48,7 @@ namespace BudgetHistory.Core.Services
                     return await base.Failed<Room>(_logger, $"Room \'{roomId}\' does not exist.");
                 }
 
-                await room.DecryptValues(_encryptionDecryptionService, _configuration.GetSection(Constants.AppSettings.SecretKey).Value);
+                await room.DecryptValues(_encryptionDecryptionService, _configuration.GetSection(AppSettings.SecretKey).Value);
                 return ServiceResponse<Room>.Success(room);
             });
         }
@@ -76,7 +77,7 @@ namespace BudgetHistory.Core.Services
         public async Task<ServiceResponse> CreateRoom(Room newRoom, Guid userId)
         {
             newRoom.Id = Guid.NewGuid();
-            newRoom.EncryptedPassword = await _encryptionDecryptionService.Encrypt(newRoom.Password, _configuration.GetSection(Constants.AppSettings.SecretKey).Value);
+            newRoom.EncryptedPassword = await _encryptionDecryptionService.Encrypt(newRoom.Password, _configuration.GetSection(AppSettings.SecretKey).Value);
 
             var userRepository = _unitOfWork.GetGenericRepository<User>();
 

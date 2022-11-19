@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
+using BudgetHistory.Abstractions.Interfaces.Data;
 using BudgetHistory.Application.Core;
 using BudgetHistory.Application.DTOs.Room;
-using BudgetHistory.Core.Interfaces.Repositories;
 using BudgetHistory.Core.Models;
 using MediatR;
 using Microsoft.EntityFrameworkCore;

@@ -3,7 +3,7 @@ using BudgetHistory.Core.Services.Responses;
 using System;
 using System.Threading.Tasks;
 
-namespace BudgetHistory.Core.Services.Interfaces
+namespace BudgetHistory.Abstractions.Services
 {
     public interface IRoomService
     {
