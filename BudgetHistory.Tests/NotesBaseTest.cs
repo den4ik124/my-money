@@ -35,7 +35,7 @@ namespace BudgetHistory.Tests
             UnitOfWorkMock.Setup(x => x.GetGenericRepository<Note>()).Returns(NoteRepoMock.Object);
             UnitOfWorkMock.Setup(x => x.GetGenericRepository<Room>()).Returns(RoomRepoMock.Object);
 
-            RoomService = new RoomService(UnitOfWorkMock.Object, EncryptionService, Configuration, tokenServiceMock.Object);
+            RoomService = new RoomService(UnitOfWorkMock.Object, EncryptionService, Configuration, tokenServiceMock.Object, LoggerMock.Object);
             NoteService = new NoteService(UnitOfWorkMock.Object, Mapper, RoomService, EncryptionService, LoggerMock.Object);
         }
 

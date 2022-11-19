@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace BudgetHistory.Core.Services
 {
-    public class NoteService : INoteService
+    public class NoteService : BaseService, INoteService
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -41,10 +41,7 @@ namespace BudgetHistory.Core.Services
             var room = (await _roomService.GetRoomById(roomId))?.Value;
             if (room is null)
             {
-                return await Failed<IEnumerable<Note>>($"Room Id: {roomId}.\nRoom was not found");
-                //var errorMessage = $"Room Id: {roomId}.\nRoom was not found";
-                //await _logger.LogInfo(errorMessage);
-                //return ServiceResponse<IEnumerable<Note>>.Failure(errorMessage);
+                return await base.Failed<IEnumerable<Note>>(_logger, $"Room Id: {roomId}.\nRoom was not found");
             }
 
             foreach (var note in notes)
@@ -60,11 +57,7 @@ namespace BudgetHistory.Core.Services
             var note = _noteRepository.GetQuery(note => note.Id == noteId).FirstOrDefault();
             if (note is null)
             {
-                return await Failed<Note>($"Note (ID : {noteId}) does not exist");
-
-                //var errorMessage = $"Note (ID : {noteId}) does not exist";
-                //await _logger.LogInfo(errorMessage);
-                //return ServiceResponse<Note>.Failure(errorMessage);
+                return await Failed<Note>(_logger, $"Note (ID : {noteId}) does not exist");
             }
 
             var room = (await _roomService.GetRoomById(note.RoomId)).Value;
@@ -89,10 +82,7 @@ namespace BudgetHistory.Core.Services
             {
                 if (value < 0)
                 {
-                    return await Failed("Баланс не может иметь отрицательное значение!");
-                    //errorMessage = "Баланс не может иметь отрицательное значение!";
-                    //await _logger.LogInfo(errorMessage);
-                    //return ServiceResponse.Failure(errorMessage);
+                    return await Failed(_logger, "Баланс не может иметь отрицательное значение!");
                 }
                 newNote.Balance = value;
             }
@@ -105,16 +95,12 @@ namespace BudgetHistory.Core.Services
                 await _unitOfWork.CompleteAsync();
                 return ServiceResponse.Success($"Note (id : {newNote.Id})\nhas been created successfully!");
             }
-            return await Failed("Note was not created.");
-
-            //errorMessage = "Note was not created.";
-            //await _logger.LogInfo(errorMessage);
-            //return ServiceResponse.Failure(errorMessage);
+            return await Failed(_logger, "Note was not created.");
         }
 
         public async Task<ServiceResponse> DeleteNote(Guid noteId)
         {
-            return ServiceResponse.Failure("Method not implemented properly.");
+            return await base.Failed(_logger, "Method not implemented properly.");
         }
 
         public async Task<ServiceResponse> UpdateNote(Note updatedNote)
@@ -124,10 +110,7 @@ namespace BudgetHistory.Core.Services
             var oldNote = await _noteRepository.GetById(updatedNote.Id);
             if (oldNote is null)
             {
-                return await Failed($"Note (id : {updatedNote.Id}\nwas not found.");
-                //errorMessage = $"Note (id : {updatedNote.Id}\nwas not found.";
-                //await _logger.LogInfo(errorMessage);
-                //return ServiceResponse.Failure(errorMessage);
+                return await Failed(_logger, $"Note (id : {updatedNote.Id}\nwas not found.");
             }
 
             var room = (await _roomService.GetRoomById(updatedNote.RoomId)).Value;
@@ -156,11 +139,7 @@ namespace BudgetHistory.Core.Services
                 if (!notesToEdit.Any())
                 {
                     _unitOfWork.RollbackTransaction();
-                    return await Failed($"There are no notes to be updated.");
-
-                    //errorMessage = $"There are no notes to be updated.";
-                    //await _logger.LogInfo(errorMessage);
-                    //return ServiceResponse.Failure(errorMessage);
+                    return await Failed(_logger, $"There are no notes to be updated.");
                 }
 
                 foreach (var note in notesToEdit)
@@ -201,14 +180,7 @@ namespace BudgetHistory.Core.Services
             {
                 await item.DecryptValues(_encryptionDecryptionService, roomPassword);
             }
-
-            //foreach (var currencyGroup in currencyGroups)
-            //{
-            //    foreach (var item in currencyGroup)
-            //    {
-            //        await item.DecryptValues(_encryptionDecryptionService, roomPassword);
-            //    }
-            //}
+            //TODO: проверить ошибку тут, если записи будут браться некорректно из групп
 
             var oldCurrencyGroup = currencyGroups.FirstOrDefault(group => group.Key == oldNote.Currency)
                                                  .ToList();
@@ -329,20 +301,6 @@ namespace BudgetHistory.Core.Services
             return _noteRepository.GetQuery(null, orderBy)
                        .Skip(offset)
                        .Take(pageSize);
-        }
-
-        private async Task<ServiceResponse> Failed(string message)
-        {
-            var prefix = $"{nameof(NoteService)}:\n";
-            await _logger.LogInfo(prefix + message);
-            return ServiceResponse.Failure(message);
-        }
-
-        private async Task<ServiceResponse<TResult>> Failed<TResult>(string message) where TResult : class
-        {
-            var prefix = $"{nameof(NoteService)}:\n";
-            await _logger.LogInfo(prefix + message);
-            return ServiceResponse<TResult>.Failure(message);
         }
     }
 }

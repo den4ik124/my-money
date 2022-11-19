@@ -32,7 +32,7 @@ namespace BudgetHistory.Tests.HandlersTests.Notes
             var tokenServiceMock = new Mock<ITokenService>();
 
             var room = await RoomRepoMock.Object.GetQuery().FirstOrDefault().DecryptValues(EncryptionService, Configuration.GetSection(AppSettings.SecretKey).Value);
-            var roomService = new RoomService(UnitOfWorkMock.Object, EncryptionService, Configuration, tokenServiceMock.Object);
+            var roomService = new RoomService(UnitOfWorkMock.Object, EncryptionService, Configuration, tokenServiceMock.Object, LoggerMock.Object);
             foreach (var note in NoteRepoMock.Object.GetAll().Result)
             {
                 note.EncryptedValue = await EncryptionService.Encrypt(note.Value.ToString(), room.Password);

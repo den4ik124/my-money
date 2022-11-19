@@ -4,6 +4,8 @@ using BudgetHistory.Core.Interfaces.Repositories;
 using BudgetHistory.Core.Models;
 using BudgetHistory.Core.Services.Interfaces;
 using BudgetHistory.Core.Services.Responses;
+using BudgetHistory.Logging;
+using BudgetHistory.Logging.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -13,20 +15,22 @@ using System.Threading.Tasks;
 
 namespace BudgetHistory.Core.Services
 {
-    public class RoomService : IRoomService
+    public class RoomService : BaseService, IRoomService
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IEncryptionDecryption _encryptionDecryptionService;
         private readonly IConfiguration _configuration;
         private readonly ITokenService _tokenService;
+        private readonly CustomLogger _logger;
 
         //TODO impelement methods here
-        public RoomService(IUnitOfWork unitOfWork, IEncryptionDecryption encryptionDecryptionService, IConfiguration configuration, ITokenService tokenService)
+        public RoomService(IUnitOfWork unitOfWork, IEncryptionDecryption encryptionDecryptionService, IConfiguration configuration, ITokenService tokenService, ICustomLoggerFactory loggerFactory)
         {
             _unitOfWork = unitOfWork;
             _encryptionDecryptionService = encryptionDecryptionService;
             _configuration = configuration;
             _tokenService = tokenService;
+            _logger = loggerFactory.CreateLogger<RoomService>();
         }
 
         public async Task<ServiceResponse<Room>> GetRoomById<T>(T roomId)
@@ -40,7 +44,7 @@ namespace BudgetHistory.Core.Services
 
                 if (room == null)
                 {
-                    return ServiceResponse<Room>.Failure($"Room \'{roomId}\' does not exist.");
+                    return await base.Failed<Room>(_logger, $"Room \'{roomId}\' does not exist.");
                 }
 
                 await room.DecryptValues(_encryptionDecryptionService, _configuration.GetSection(Constants.AppSettings.SecretKey).Value);
@@ -60,9 +64,8 @@ namespace BudgetHistory.Core.Services
 
             if (!room.Password.Equals(roomPassword))
             {
-                var errorMessage = $"Wrong room password!";
                 //TODO: Add attempts handler/counter
-                return ServiceResponse<string>.Failure(errorMessage);
+                return await base.Failed<string>(_logger, "Wrong room password!");
             }
 
             var token = _tokenService.CreateRoomSessionToken(result.Value, currentUserId);
@@ -80,7 +83,7 @@ namespace BudgetHistory.Core.Services
             var user = userRepository.GetQuery(u => u.AssociatedIdentityUserId == userId).Include(r => r.Rooms).FirstOrDefault();
             if (user is null)
             {
-                return ServiceResponse.Failure("Creation failed. User does not exist.");
+                return await base.Failed<string>(_logger, "Creation failed. User does not exist");
             }
 
             newRoom.OwnerId = user.Id;
@@ -92,7 +95,7 @@ namespace BudgetHistory.Core.Services
 
             var result = await _unitOfWork.GetGenericRepository<Room>().Add(newRoom);
 
-            return result && await _unitOfWork.CompleteAsync() ? ServiceResponse.Success("Creation succeeded.") : ServiceResponse.Failure("Creation failed.");
+            return result && await _unitOfWork.CompleteAsync() ? ServiceResponse.Success("Creation succeeded.") : await base.Failed<string>(_logger, "Creation failed.");
         }
 
         public async Task<ServiceResponse<IEnumerable<Room>>> GetRoomsForUser(Guid userId)

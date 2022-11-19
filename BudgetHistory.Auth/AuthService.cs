@@ -4,6 +4,7 @@ using BudgetHistory.Core.AppSettings;
 using BudgetHistory.Core.Constants;
 using BudgetHistory.Core.Interfaces.Repositories;
 using BudgetHistory.Core.Models;
+using BudgetHistory.Core.Services;
 using BudgetHistory.Core.Services.Interfaces;
 using BudgetHistory.Core.Services.Responses;
 using BudgetHistory.Logging;
@@ -17,7 +18,7 @@ using System.Threading.Tasks;
 
 namespace BudgetHistory.Auth
 {
-    public class AuthService : IAuthService
+    public class AuthService : BaseService, IAuthService
     {
         private readonly IMapper _mapper;
         private readonly ITokenService _tokenService;
@@ -52,10 +53,7 @@ namespace BudgetHistory.Auth
 
                 if (userFromDB == null)
                 {
-                    return await Failed($"User \"{userName}\" was not found.");
-                    //var errorMessage = $"User \"{userName}\" was not found.";
-                    //await _logger.LogError(errorMessage);
-                    //return new AuthResult() { IsSuccess = false, Message = errorMessage };
+                    return await Failed(_logger, $"User \"{userName}\" was not found.");
                 }
 
                 var result = await _signInManager.CheckPasswordSignInAsync(userFromDB, password, false);
@@ -71,7 +69,6 @@ namespace BudgetHistory.Auth
                         Secure = true,
                     });
                     return ServiceResponse.Success("Successful login.");
-                    //return new AuthResult() { IsSuccess = true, Message = "Successful login." };
                 }
             }
             catch (Exception ex)
@@ -80,8 +77,7 @@ namespace BudgetHistory.Auth
                 await _logger.LogError(errorMessage);
             }
 
-            return await Failed("Incorrect password.");
-            //return new AuthResult() { IsSuccess = false, Message = "Incorrect password." };
+            return await Failed(_logger, "Incorrect password.");
         }
 
         public async Task<ServiceResponse> RegisterUser(IdentityUser identityUser, string password)
@@ -91,29 +87,19 @@ namespace BudgetHistory.Auth
             var result = await _userManager.CreateAsync(identityUser, password);
             if (!result.Succeeded)
             {
-                return await Failed(string.Join("|", result.Errors.Select(e => e.Description)));
-                //errorMessage = string.Join("|", result.Errors.Select(e => e.Description));
-                //await _logger.LogError(errorMessage);
-                //return new AuthResult() { IsSuccess = result.Succeeded, Message = errorMessage };
+                return await Failed(_logger, string.Join("|", result.Errors.Select(e => e.Description)));
             }
 
             var userFromDb = await _userManager.FindByNameAsync(identityUser.UserName);
             if (userFromDb == null)
             {
-                return await Failed($"User ({identityUser.UserName}) does not exist yet.");
-                //errorMessage = $"User ({identityUser.UserName}) does not exist yet.";
-                //await _logger.LogError(errorMessage);
-                //return new AuthResult() { IsSuccess = false, Message = errorMessage };
+                return await Failed(_logger, $"User ({identityUser.UserName}) does not exist yet.");
             }
 
             var addToRoleResult = await _userManager.AddToRoleAsync(userFromDb, nameof(Roles.Customer));
             if (!addToRoleResult.Succeeded)
             {
-                return await Failed(string.Join('|', addToRoleResult.Errors.Select(e => e.Description)));
-
-                //errorMessage = string.Join('|', addToRoleResult.Errors.Select(e => e.Description));
-                //await _logger.LogError(errorMessage);
-                //return new AuthResult() { IsSuccess = false, Message = errorMessage };
+                return await Failed(_logger, string.Join('|', addToRoleResult.Errors.Select(e => e.Description)));
             }
 
             user.Id = Guid.NewGuid();
@@ -123,27 +109,8 @@ namespace BudgetHistory.Auth
             {
                 await _unitOfWork.CompleteAsync();
                 return ServiceResponse.Success($"\"{identityUser.UserName}\" has been successfully registered.");
-
-                //return new AuthResult() { IsSuccess = result.Succeeded, Message = $"\"{identityUser.UserName}\" has been successfully registered." };
             }
-            return await Failed($"User ({identityUser.UserName}) can't be registered.");
-            //errorMessage = $"User ({identityUser.UserName}) can't be registered.";
-            //await _logger.LogError(errorMessage);
-            //return new AuthResult() { IsSuccess = false, Message = errorMessage };
+            return await Failed(_logger, $"User ({identityUser.UserName}) can't be registered.");
         }
-
-        private async Task<ServiceResponse> Failed(string message)
-        {
-            var prefix = $"{nameof(AuthService)}:\n";
-            await _logger.LogInfo(prefix + message);
-            return ServiceResponse.Failure(message);
-        }
-
-        //private async Task<ServiceResponse<TResult>> Failed<TResult>(string message) where TResult : class
-        //{
-        //    var prefix = $"{nameof(AuthService)}:\n";
-        //    await _logger.LogInfo(prefix + message);
-        //    return ServiceResponse<TResult>.Failure(message);
-        //}
     }
 }

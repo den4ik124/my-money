@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace BudgetHistory.Core.Services
 {
-    public class TokenService : ITokenService
+    public class TokenService : BaseService, ITokenService
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly AuthTokenParameters _authTokenParameters;
