@@ -14,13 +14,13 @@ name: $(date:yyyyMMdd)$(rev:.r)
 trigger:
 - master
 jobs:
-- job: Tests_check
-  displayName: Build project, check tests and prepare artifacts
+- job: Job_1
+  displayName: Check tests
   pool:
     vmImage: ubuntu-22.04
   steps:
   - checkout: self
-  
+
   - task: UseDotNet@2
     displayName: 'Use .NET Core sdk 5.x'
     inputs:
@@ -37,7 +37,6 @@ jobs:
     inputs:
       projects: $(BuildParameters.RestoreBuildProjects)
       arguments: --configuration $(BuildConfiguration)
-      
 
   - task: DotNetCoreCLI@2
     displayName: Test
@@ -45,5 +44,4 @@ jobs:
       command: test
       projects: $(BuildParameters.TestProjects)
       arguments: --configuration $(BuildConfiguration)
-...
 
