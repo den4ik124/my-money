@@ -101,7 +101,8 @@ namespace BudgetHistory.Business.Services
 
         public async Task<ServiceResponse> DeleteNote(Guid noteId)
         {
-            return await base.Failed(_logger, "Method not implemented properly.");
+            return ServiceResponse.Failure("Method not implemented properly.");
+            //return await base.Failed(_logger, "Method not implemented properly.");
         }
 
         public async Task<ServiceResponse> UpdateNote(Note updatedNote)
@@ -302,31 +303,6 @@ namespace BudgetHistory.Business.Services
             return _noteRepository.GetQuery(null, orderBy)
                        .Skip(offset)
                        .Take(pageSize);
-        }
-
-        Task<Core.Services.Responses.ServiceResponse<Note>> INoteService.GetNoteById(Guid noteId)
-        {
-            throw new NotImplementedException();
-        }
-
-        Task<Core.Services.Responses.ServiceResponse<IEnumerable<Note>>> INoteService.GetAllNotes(Guid roomId, int pageNumber, int pageSize, Expression<Func<Note, bool>> predicate, Func<IQueryable<Note>, IOrderedQueryable<Note>> orderBy)
-        {
-            throw new NotImplementedException();
-        }
-
-        Task<Core.Services.Responses.ServiceResponse> INoteService.CreateNewNote(Note newNote, Currency currency, decimal value)
-        {
-            throw new NotImplementedException();
-        }
-
-        Task<Core.Services.Responses.ServiceResponse> INoteService.UpdateNote(Note updatedNote)
-        {
-            throw new NotImplementedException();
-        }
-
-        Task<Core.Services.Responses.ServiceResponse> INoteService.DeleteNote(Guid noteId)
-        {
-            throw new NotImplementedException();
         }
     }
 }
