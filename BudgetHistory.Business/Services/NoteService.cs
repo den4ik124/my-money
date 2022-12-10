@@ -5,6 +5,7 @@ using BudgetHistory.Abstractions.Services;
 using BudgetHistory.Core;
 using BudgetHistory.Core.Extensions;
 using BudgetHistory.Core.Models;
+using BudgetHistory.Core.Resources;
 using BudgetHistory.Core.Services.Responses;
 using BudgetHistory.Logging;
 using BudgetHistory.Logging.Interfaces;
@@ -42,7 +43,7 @@ namespace BudgetHistory.Business.Services
             var room = (await _roomService.GetRoomById(roomId))?.Value;
             if (room is null)
             {
-                return await base.Failed<IEnumerable<Note>>(_logger, $"Room Id: {roomId}.\nRoom was not found");
+                return await base.Failed<IEnumerable<Note>>(_logger, string.Format(ResponseMessages.RoomDoesNotExist, roomId));
             }
 
             foreach (var note in notes)
@@ -58,7 +59,7 @@ namespace BudgetHistory.Business.Services
             var note = _noteRepository.GetQuery(note => note.Id == noteId).FirstOrDefault();
             if (note is null)
             {
-                return await Failed<Note>(_logger, $"Note (ID : {noteId}) does not exist");
+                return await Failed<Note>(_logger, string.Format(ResponseMessages.NoteDoesNotExist, noteId));
             }
 
             var room = (await _roomService.GetRoomById(note.RoomId)).Value;
@@ -83,7 +84,7 @@ namespace BudgetHistory.Business.Services
             {
                 if (value < 0)
                 {
-                    return await Failed(_logger, "Баланс не может иметь отрицательное значение!");
+                    return await Failed(_logger, ResponseMessages.NegativeBalanceError);
                 }
                 newNote.Balance = value;
             }
@@ -94,9 +95,9 @@ namespace BudgetHistory.Business.Services
             if (await _noteRepository.Add(newNote))
             {
                 await _unitOfWork.CompleteAsync();
-                return ServiceResponse.Success($"Note (id : {newNote.Id})\nhas been created successfully!");
+                return ServiceResponse.Success(string.Format(ResponseMessages.NoteSuccessfullyCreated, newNote.Id));
             }
-            return await Failed(_logger, "Note was not created.");
+            return await Failed(_logger, ResponseMessages.NoteCreationError);
         }
 
         public async Task<ServiceResponse> DeleteNote(Guid noteId)
@@ -112,7 +113,7 @@ namespace BudgetHistory.Business.Services
             var oldNote = await _noteRepository.GetById(updatedNote.Id);
             if (oldNote is null)
             {
-                return await Failed(_logger, $"Note (id : {updatedNote.Id}\nwas not found.");
+                return await Failed(_logger, string.Format(ResponseMessages.NoteDoesNotExist, updatedNote.Id));
             }
 
             var room = (await _roomService.GetRoomById(updatedNote.RoomId)).Value;
@@ -131,7 +132,7 @@ namespace BudgetHistory.Business.Services
                 _noteRepository.Update(oldNote);
                 _unitOfWork.TransactionCommit();
                 await _unitOfWork.CompleteAsync();
-                return ServiceResponse.Success($"Note (id : {updatedNote.Id}\nhas been updated successfully.");
+                return ServiceResponse.Success(string.Format(ResponseMessages.NoteSuccessfullyUpdated, updatedNote.Id));
             }
 
             try
@@ -141,7 +142,7 @@ namespace BudgetHistory.Business.Services
                 if (!notesToEdit.Any())
                 {
                     _unitOfWork.RollbackTransaction();
-                    return await Failed(_logger, $"There are no notes to be updated.");
+                    return await Failed(_logger, ResponseMessages.NotesToUpdateListIsEmpty);
                 }
 
                 foreach (var note in notesToEdit)
@@ -156,7 +157,7 @@ namespace BudgetHistory.Business.Services
 
             _unitOfWork.TransactionCommit();
             await _unitOfWork.CompleteAsync();
-            return ServiceResponse.Success($"Note (id : {updatedNote.Id}\nhas been updated successfully.");
+            return ServiceResponse.Success(string.Format(ResponseMessages.NoteSuccessfullyUpdated, updatedNote.Id));
         }
 
         private async Task<IEnumerable<Note>> GetNotesWithUpdatedBalances(Note oldNote, Note updatedNote, string roomPassword)
@@ -281,7 +282,7 @@ namespace BudgetHistory.Business.Services
 
                 if (note.Balance < 0)
                 {
-                    throw new NoteNegativeBalanceException($"Изменение в записи (id:{note.Id})\nведет к отрицательному балансу в следующих записях. Проверьте валидность указанного значения.");
+                    throw new NoteNegativeBalanceException($"Изменение в записи (id:{note.Id})\nведет к отрицательному балансу в следующих записях. Проверьте валидность указанного значения."); //TODO поменять на ресурс
                 }
 
                 await note.EncryptValues(_encryptionDecryptionService, roomPassword);

@@ -4,6 +4,7 @@ using BudgetHistory.Abstractions.Services;
 using BudgetHistory.Core.Constants;
 using BudgetHistory.Core.Extensions;
 using BudgetHistory.Core.Models;
+using BudgetHistory.Core.Resources;
 using BudgetHistory.Core.Services.Responses;
 using BudgetHistory.Logging;
 using BudgetHistory.Logging.Interfaces;
@@ -45,7 +46,7 @@ namespace BudgetHistory.Business.Services
 
                 if (room == null)
                 {
-                    return await base.Failed<Room>(_logger, $"Room \'{roomId}\' does not exist.");
+                    return await base.Failed<Room>(_logger, string.Format(ResponseMessages.RoomDoesNotExist, roomId));
                 }
 
                 await room.DecryptValues(_encryptionDecryptionService, _configuration.GetSection(AppSettings.SecretKey).Value);
@@ -66,7 +67,7 @@ namespace BudgetHistory.Business.Services
             if (!room.Password.Equals(roomPassword))
             {
                 //TODO: Add attempts handler/counter
-                return await base.Failed<string>(_logger, "Wrong room password!");
+                return await base.Failed<string>(_logger, ResponseMessages.WrongRoomPassword);
             }
 
             var token = _tokenService.CreateRoomSessionToken(result.Value, currentUserId);
@@ -84,7 +85,7 @@ namespace BudgetHistory.Business.Services
             var user = userRepository.GetQuery(u => u.AssociatedIdentityUserId == userId).Include(r => r.Rooms).FirstOrDefault();
             if (user is null)
             {
-                return await base.Failed<string>(_logger, "Creation failed. User does not exist");
+                return await base.Failed<string>(_logger, string.Format(ResponseMessages.UserWithNameDoesNotExist, userId));
             }
 
             newRoom.OwnerId = user.Id;
@@ -96,7 +97,9 @@ namespace BudgetHistory.Business.Services
 
             var result = await _unitOfWork.GetGenericRepository<Room>().Add(newRoom);
 
-            return result && await _unitOfWork.CompleteAsync() ? ServiceResponse.Success("Creation succeeded.") : await base.Failed<string>(_logger, "Creation failed.");
+            return result && await _unitOfWork.CompleteAsync()
+                ? ServiceResponse.Success(string.Format(ResponseMessages.RoomSuccessfullyCreated, newRoom.Id))
+                : await base.Failed<string>(_logger, ResponseMessages.RoomCreationError);
         }
 
         public async Task<ServiceResponse<IEnumerable<Room>>> GetRoomsForUser(Guid userId)
@@ -104,7 +107,9 @@ namespace BudgetHistory.Business.Services
             {
                 var rooms = _unitOfWork.GetGenericRepository<Room>().GetQuery(r => r.Users.Select(u => u.AssociatedIdentityUserId).Contains(userId));
 
-                return rooms.Any() ? ServiceResponse<IEnumerable<Room>>.Success(rooms) : ServiceResponse<IEnumerable<Room>>.Failure($"There are no valid rooms for a particular user yet");
+                return rooms.Any()
+                    ? ServiceResponse<IEnumerable<Room>>.Success(rooms)
+                    : ServiceResponse<IEnumerable<Room>>.Failure(string.Format(ResponseMessages.UserHaveNoRooms, userId));
             });
     }
 }
