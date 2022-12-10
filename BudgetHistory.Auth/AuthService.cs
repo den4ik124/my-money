@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -43,6 +44,24 @@ namespace BudgetHistory.Auth
             _unitOfWork = unitOfWork;
             _authTokenParameters = authParams.Value;
             _logger = logFactory.CreateLogger<AuthService>();
+        }
+
+        public async Task<ServiceResponse<IdentityUser>> GetCurrentUser(string userName)
+        {
+            var user = await _userManager.FindByNameAsync(userName);
+
+            return user is null
+                ? ServiceResponse<IdentityUser>.Failure("User does not exists.")
+                : ServiceResponse<IdentityUser>.Success(user);
+        }
+
+        public async Task<ServiceResponse<IList<string>>> GetUserRoles(IdentityUser user)
+        {
+            var roles = await _userManager.GetRolesAsync(user);
+
+            return !roles.Any()
+                ? ServiceResponse<IList<string>>.Failure("Roles are not set.")
+                : ServiceResponse<IList<string>>.Success(roles);
         }
 
         public async Task<ServiceResponse> Authenticate(string userName, string password, HttpContext context)

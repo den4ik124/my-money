@@ -17,6 +17,8 @@ namespace BudgetHistory.Abstractions.Interfaces.Data
 
         Task<IEnumerable<TEntity>> GetWhere(Expression<Func<TEntity, bool>> predicate);
 
+        Task<TEntity> GetFirst(Expression<Func<TEntity, bool>> predicate);
+
         Task<int> GetItemsCount(Expression<Func<TEntity, bool>> predicate = null);
 
         Task<bool> Add(TEntity entity);

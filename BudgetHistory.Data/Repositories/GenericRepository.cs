@@ -59,6 +59,11 @@ namespace BudgetHistory.Data.Repositories
             return await _dbSet.Where(predicate).ToListAsync();
         }
 
+        public async Task<TEntity> GetFirst(Expression<Func<TEntity, bool>> predicate)
+        {
+            return await _dbSet.FirstOrDefaultAsync(predicate);
+        }
+
         public async Task<int> GetItemsCount(Expression<Func<TEntity, bool>> predicate = null)
         {
             if (predicate != null)
