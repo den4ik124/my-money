@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using BudgetHistory.Application.DTOs;
 using BudgetHistory.Application.DTOs.Auth;
 using BudgetHistory.Application.DTOs.Note;
 using BudgetHistory.Application.DTOs.Room;
@@ -26,7 +25,7 @@ namespace BudgetHistory.API.Mappings
 
             CreateMap<UserRegistrationDto, IdentityUser>().ReverseMap();
             CreateMap<User, IdentityUser>().ReverseMap();
-            CreateMap<User, UserDto>().ReverseMap();
+            CreateMap<User, UserDataDto>().ReverseMap();
         }
     }
 }
