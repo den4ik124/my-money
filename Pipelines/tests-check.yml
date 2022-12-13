@@ -21,6 +21,13 @@ jobs:
   steps:
   - checkout: self
 
+  - task: FileTransform@1
+    displayName: 'File transformation: appsettings.json'
+    inputs:
+      folderPath: '$(Pipeline.Workspace)'
+      targetFiles: '**/appsettings.json'
+      fileType: json
+      
   - task: UseDotNet@2
     displayName: 'Use .NET Core sdk 5.x'
     inputs:
