@@ -1,4 +1,5 @@
 ﻿using BudgetHistory.Abstractions.Interfaces;
+using BudgetHistory.Core.Resources;
 using BudgetHistory.Logging;
 using BudgetHistory.Logging.Interfaces;
 using System;
@@ -66,7 +67,7 @@ namespace BudgetHistory.Business.Services
             var keyBytes = Encoding.UTF8.GetBytes(secretKey);
             if (keyBytes.Length > 32)
             {
-                var errorMessage = $"{nameof(EncryptionDecryptionService)}:\nСлишком длинный пароль!";
+                var errorMessage = string.Format(ResponseMessages.LongPassword, nameof(EncryptionDecryptionService));
                 await _log.LogError(errorMessage);
                 throw new Exception(errorMessage);
             }

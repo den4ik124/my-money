@@ -3,6 +3,7 @@ using BudgetHistory.Abstractions.Services;
 using BudgetHistory.Application.Core;
 using BudgetHistory.Application.DTOs.Room;
 using BudgetHistory.Core.Extensions;
+using BudgetHistory.Core.Resources;
 using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
@@ -31,7 +32,7 @@ namespace BudgetHistory.Application.Rooms.Queries
 
             if (roomResult.Value.IsUserAllowableToReadData(request.UserId))
             {
-                return Result<RoomResponseDto>.Failure($"This user (id : {request.UserId}) can't get information from this room. Request access from room owner.");
+                return Result<RoomResponseDto>.Failure(ResponseMessages.UserRoomAccessDenied);
             }
 
             var roomsDto = _mapper.Map<RoomResponseDto>(roomResult.Value);

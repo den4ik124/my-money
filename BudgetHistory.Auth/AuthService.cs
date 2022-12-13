@@ -6,6 +6,7 @@ using BudgetHistory.Business.Services;
 using BudgetHistory.Core.AppSettings;
 using BudgetHistory.Core.Constants;
 using BudgetHistory.Core.Models;
+using BudgetHistory.Core.Resources;
 using BudgetHistory.Core.Services.Responses;
 using BudgetHistory.Logging;
 using BudgetHistory.Logging.Interfaces;
@@ -51,7 +52,7 @@ namespace BudgetHistory.Auth
             var user = await _userManager.FindByNameAsync(userName);
 
             return user is null
-                ? ServiceResponse<IdentityUser>.Failure("User does not exists.")
+                ? ServiceResponse<IdentityUser>.Failure(string.Format(ResponseMessages.UserWithNameDoesNotExist, userName))
                 : ServiceResponse<IdentityUser>.Success(user);
         }
 
@@ -60,7 +61,7 @@ namespace BudgetHistory.Auth
             var roles = await _userManager.GetRolesAsync(user);
 
             return !roles.Any()
-                ? ServiceResponse<IList<string>>.Failure("Roles are not set.")
+                ? ServiceResponse<IList<string>>.Failure(ResponseMessages.RolesAreNotSet)
                 : ServiceResponse<IList<string>>.Success(roles);
         }
 
@@ -72,7 +73,7 @@ namespace BudgetHistory.Auth
 
                 if (userFromDB == null)
                 {
-                    return await Failed(_logger, $"User \"{userName}\" was not found.");
+                    return await Failed(_logger, string.Format(ResponseMessages.UserWithNameDoesNotExist, userName));
                 }
 
                 var result = await _signInManager.CheckPasswordSignInAsync(userFromDB, password, false);
@@ -87,7 +88,7 @@ namespace BudgetHistory.Auth
                         SameSite = SameSiteMode.None,
                         Secure = true,
                     });
-                    return ServiceResponse.Success("Successful login.");
+                    return ServiceResponse.Success(string.Format(ResponseMessages.UserSuccessfullLogin, userName));
                 }
             }
             catch (Exception ex)
@@ -96,7 +97,7 @@ namespace BudgetHistory.Auth
                 await _logger.LogError(errorMessage);
             }
 
-            return await Failed(_logger, "Incorrect password.");
+            return await Failed(_logger, string.Format(ResponseMessages.UserLoginInvalidPassword, userName));
         }
 
         public async Task<ServiceResponse> RegisterUser(IdentityUser identityUser, string password)
@@ -112,7 +113,7 @@ namespace BudgetHistory.Auth
             var userFromDb = await _userManager.FindByNameAsync(identityUser.UserName);
             if (userFromDb == null)
             {
-                return await Failed(_logger, $"User ({identityUser.UserName}) does not exist yet.");
+                return await Failed(_logger, string.Format(ResponseMessages.UserWithNameDoesNotExist, identityUser.UserName));
             }
 
             var addToRoleResult = await _userManager.AddToRoleAsync(userFromDb, nameof(Roles.Customer));
@@ -127,9 +128,9 @@ namespace BudgetHistory.Auth
             if (await _unitOfWork.GetGenericRepository<User>().Add(user))
             {
                 await _unitOfWork.CompleteAsync();
-                return ServiceResponse.Success($"\"{identityUser.UserName}\" has been successfully registered.");
+                return ServiceResponse.Success(string.Format(ResponseMessages.UserSuccessfullRegistration, identityUser.UserName));
             }
-            return await Failed(_logger, $"User ({identityUser.UserName}) can't be registered.");
+            return await Failed(_logger, string.Format(ResponseMessages.UserFailedRegistration, identityUser.UserName));
         }
     }
 }

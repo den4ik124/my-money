@@ -4,6 +4,7 @@ using BudgetHistory.Application.Core;
 using BudgetHistory.Application.DTOs.Auth;
 using BudgetHistory.Auth.Interfaces;
 using BudgetHistory.Core.Models;
+using BudgetHistory.Core.Resources;
 using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
@@ -27,11 +28,13 @@ namespace BudgetHistory.Application.Auth.Queries
         {
             if (string.IsNullOrEmpty(request.UserName))
             {
-                return Result<UserDataDto>.Failure("'UserName' is empty. Such user does not exists");
+                //TODO Logging here
+                return Result<UserDataDto>.Failure(ResponseMessages.EmptyUserName);
             }
             var result = await _authService.GetCurrentUser(request.UserName);
             if (!result.IsSuccess)
             {
+                //TODO Logging here
                 return Result<UserDataDto>.Failure(result.Message);
             }
 
@@ -44,7 +47,7 @@ namespace BudgetHistory.Application.Auth.Queries
                 return Result<UserDataDto>.Failure(rolesResult.Message);
             }
 
-            var userDataDtoResponse = _mapper.Map<User, UserDataDto>(user); //TODO нет ролей. Добавить проверку
+            var userDataDtoResponse = _mapper.Map<User, UserDataDto>(user);
             userDataDtoResponse.Roles = rolesResult.Value;
 
             return Result<UserDataDto>.Success(userDataDtoResponse);

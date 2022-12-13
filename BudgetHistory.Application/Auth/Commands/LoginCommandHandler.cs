@@ -1,5 +1,6 @@
 ﻿using BudgetHistory.Application.Core;
 using BudgetHistory.Auth.Interfaces;
+using BudgetHistory.Core.Resources;
 using BudgetHistory.Logging;
 using BudgetHistory.Logging.Interfaces;
 using MediatR;
@@ -23,14 +24,14 @@ namespace BudgetHistory.Application.Auth.Commands
         {
             if (string.IsNullOrEmpty(request.UserLoginDto.UserName))
             {
-                return Result<string>.Failure("Username has not been inputted!");
+                return Result<string>.Failure(ResponseMessages.EmptyUserName);
             }
 
             var result = await _authService.Authenticate(request.UserLoginDto.UserName, request.UserLoginDto.Password, request.HttpContext);
 
             if (result.IsSuccess)
             {
-                await _logger.LogInfo($"{request.UserLoginDto.UserName} successfully signed in.");
+                await _logger.LogInfo(string.Format(ResponseMessages.UserSuccessfullLogin, request.UserLoginDto.UserName));
             }
 
             return result.IsSuccess ? Result<string>.Success(result.Message) : Result<string>.Failure(result.Message);
