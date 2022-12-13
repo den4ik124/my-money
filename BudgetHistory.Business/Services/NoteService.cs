@@ -43,7 +43,7 @@ namespace BudgetHistory.Business.Services
             var room = (await _roomService.GetRoomById(roomId))?.Value;
             if (room is null)
             {
-                return await base.Failed<IEnumerable<Note>>(_logger, string.Format(ResponseMessages.RoomDoesNotExist, roomId));
+                return await Failed<NoteService, IEnumerable<Note>>(_logger, string.Format(ResponseMessages.RoomDoesNotExist, roomId));
             }
 
             foreach (var note in notes)
@@ -59,7 +59,7 @@ namespace BudgetHistory.Business.Services
             var note = _noteRepository.GetQuery(note => note.Id == noteId).FirstOrDefault();
             if (note is null)
             {
-                return await Failed<Note>(_logger, string.Format(ResponseMessages.NoteDoesNotExist, noteId));
+                return await Failed<NoteService, Note>(_logger, string.Format(ResponseMessages.NoteDoesNotExist, noteId));
             }
 
             var room = (await _roomService.GetRoomById(note.RoomId)).Value;
@@ -84,7 +84,7 @@ namespace BudgetHistory.Business.Services
             {
                 if (value < 0)
                 {
-                    return await Failed(_logger, ResponseMessages.NegativeBalanceError);
+                    return await Failed<NoteService>(_logger, ResponseMessages.NegativeBalanceError);
                 }
                 newNote.Balance = value;
             }
@@ -97,7 +97,7 @@ namespace BudgetHistory.Business.Services
                 await _unitOfWork.CompleteAsync();
                 return ServiceResponse.Success(string.Format(ResponseMessages.NoteSuccessfullyCreated, newNote.Id));
             }
-            return await Failed(_logger, ResponseMessages.NoteCreationError);
+            return await Failed<NoteService>(_logger, ResponseMessages.NoteCreationError);
         }
 
         public async Task<ServiceResponse> DeleteNote(Guid noteId)
@@ -113,7 +113,7 @@ namespace BudgetHistory.Business.Services
             var oldNote = await _noteRepository.GetById(updatedNote.Id);
             if (oldNote is null)
             {
-                return await Failed(_logger, string.Format(ResponseMessages.NoteDoesNotExist, updatedNote.Id));
+                return await Failed<NoteService>(_logger, string.Format(ResponseMessages.NoteDoesNotExist, updatedNote.Id));
             }
 
             var room = (await _roomService.GetRoomById(updatedNote.RoomId)).Value;
@@ -142,7 +142,7 @@ namespace BudgetHistory.Business.Services
                 if (!notesToEdit.Any())
                 {
                     _unitOfWork.RollbackTransaction();
-                    return await Failed(_logger, ResponseMessages.NotesToUpdateListIsEmpty);
+                    return await Failed<NoteService>(_logger, ResponseMessages.NotesToUpdateListIsEmpty);
                 }
 
                 foreach (var note in notesToEdit)
@@ -152,7 +152,7 @@ namespace BudgetHistory.Business.Services
             }
             catch (NoteNegativeBalanceException ex)
             {
-                return ServiceResponse.Failure(ex.Message);
+                return await Failed<NoteService>(_logger, ex.Message);
             }
 
             _unitOfWork.TransactionCommit();

@@ -73,7 +73,7 @@ namespace BudgetHistory.Auth
 
                 if (userFromDB == null)
                 {
-                    return await Failed(_logger, string.Format(ResponseMessages.UserWithNameDoesNotExist, userName));
+                    return await Failed<AuthService>(_logger, string.Format(ResponseMessages.UserWithNameDoesNotExist, userName));
                 }
 
                 var result = await _signInManager.CheckPasswordSignInAsync(userFromDB, password, false);
@@ -97,7 +97,7 @@ namespace BudgetHistory.Auth
                 await _logger.LogError(errorMessage);
             }
 
-            return await Failed(_logger, string.Format(ResponseMessages.UserLoginInvalidPassword, userName));
+            return await Failed<AuthService>(_logger, string.Format(ResponseMessages.UserLoginInvalidPassword, userName));
         }
 
         public async Task<ServiceResponse> RegisterUser(IdentityUser identityUser, string password)
@@ -107,19 +107,19 @@ namespace BudgetHistory.Auth
             var result = await _userManager.CreateAsync(identityUser, password);
             if (!result.Succeeded)
             {
-                return await Failed(_logger, string.Join("|", result.Errors.Select(e => e.Description)));
+                return await Failed<AuthService>(_logger, string.Join("|", result.Errors.Select(e => e.Description)));
             }
 
             var userFromDb = await _userManager.FindByNameAsync(identityUser.UserName);
             if (userFromDb == null)
             {
-                return await Failed(_logger, string.Format(ResponseMessages.UserWithNameDoesNotExist, identityUser.UserName));
+                return await Failed<AuthService>(_logger, string.Format(ResponseMessages.UserWithNameDoesNotExist, identityUser.UserName));
             }
 
             var addToRoleResult = await _userManager.AddToRoleAsync(userFromDb, nameof(Roles.Customer));
             if (!addToRoleResult.Succeeded)
             {
-                return await Failed(_logger, string.Join('|', addToRoleResult.Errors.Select(e => e.Description)));
+                return await Failed<AuthService>(_logger, string.Join('|', addToRoleResult.Errors.Select(e => e.Description)));
             }
 
             user.Id = Guid.NewGuid();
@@ -130,7 +130,7 @@ namespace BudgetHistory.Auth
                 await _unitOfWork.CompleteAsync();
                 return ServiceResponse.Success(string.Format(ResponseMessages.UserSuccessfullRegistration, identityUser.UserName));
             }
-            return await Failed(_logger, string.Format(ResponseMessages.UserFailedRegistration, identityUser.UserName));
+            return await Failed<AuthService>(_logger, string.Format(ResponseMessages.UserFailedRegistration, identityUser.UserName));
         }
     }
 }
