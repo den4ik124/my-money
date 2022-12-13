@@ -6,16 +6,16 @@ namespace BudgetHistory.Business.Services
 {
     public class BaseService
     {
-        protected async Task<ServiceResponse> Failed(CustomLogger logger, string message)
+        protected async Task<ServiceResponse> Failed<TService>(CustomLogger logger, string message)
         {
-            var prefix = $"{nameof(NoteService)}:\n";
+            var prefix = $"{typeof(TService).Name}:\n";
             await logger.LogInfo(prefix + message);
             return ServiceResponse.Failure(message);
         }
 
-        protected async Task<ServiceResponse<TResult>> Failed<TResult>(CustomLogger logger, string message) where TResult : class
+        protected async Task<ServiceResponse<TResult>> Failed<TService, TResult>(CustomLogger logger, string message) where TResult : class
         {
-            var prefix = $"{nameof(NoteService)}:\n";
+            var prefix = $"{typeof(TService).Name}:\n";
             await logger.LogInfo(prefix + message);
             return ServiceResponse<TResult>.Failure(message);
         }

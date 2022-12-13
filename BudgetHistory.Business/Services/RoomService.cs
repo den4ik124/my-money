@@ -46,7 +46,7 @@ namespace BudgetHistory.Business.Services
 
                 if (room == null)
                 {
-                    return await base.Failed<Room>(_logger, string.Format(ResponseMessages.RoomDoesNotExist, roomId));
+                    return await Failed<RoomService, Room>(_logger, string.Format(ResponseMessages.RoomDoesNotExist, roomId));
                 }
 
                 await room.DecryptValues(_encryptionDecryptionService, _configuration.GetSection(AppSettings.SecretKey).Value);
@@ -67,7 +67,7 @@ namespace BudgetHistory.Business.Services
             if (!room.Password.Equals(roomPassword))
             {
                 //TODO: Add attempts handler/counter
-                return await base.Failed<string>(_logger, ResponseMessages.WrongRoomPassword);
+                return await Failed<RoomService, string>(_logger, ResponseMessages.WrongRoomPassword);
             }
 
             var token = _tokenService.CreateRoomSessionToken(result.Value, currentUserId);
