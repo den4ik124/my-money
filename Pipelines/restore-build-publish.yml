@@ -10,6 +10,15 @@ variables:
   value: '**/BudgetHistory.API.csproj'
 - name: BuildParameters.TestProjects
   value: '**/*[Tt]ests/*.csproj'
+- name: SecretKey
+  value: secrets.ROOM_SECRET_KEY
+- name: Authentication.Token.SigningKey
+  value : secrets.AUTH_SECRET_KEY
+- name: TelegramToken
+  value : '5596948014:AAEetBK5h16LC2ING1ubio4HW6nKcyJznro'
+- name: TelegramBotMyChat
+  value : '691377374'
+
 name: $(date:yyyyMMdd)$(rev:.r)
 trigger:
 - master
@@ -27,7 +36,16 @@ jobs:
   #     folderPath: '$(System.DefaultWorkingDirectory)/**/*.zip' 
   #     fileType: 'json'
   #     targetFiles: '**/appsettings.json'
-  
+
+
+# Update appsettings.json via FileTransform task.
+  - task: FileTransform@1
+    displayName: 'File transformation: appsettings.json'
+    inputs:
+      folderPath: '$(Pipeline.Workspace)/BudgetHistory'
+      targetFiles: '**/appsettings.json'
+      fileType: json
+    
   - task: UseDotNet@2
     displayName: 'Use .NET Core sdk 5.x'
     inputs:
