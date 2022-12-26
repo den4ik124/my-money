@@ -1,7 +1,7 @@
 using BudgetHistory.Application.DTOs.Note;
 using BudgetHistory.Application.Notes.Commands;
+using BudgetHistory.Business.Extensions;
 using BudgetHistory.Core.Constants;
-using BudgetHistory.Core.Extensions;
 using BudgetHistory.Core.Models;
 using Moq;
 using Shouldly;

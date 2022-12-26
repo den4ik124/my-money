@@ -2,7 +2,7 @@
 using BudgetHistory.Core.Models;
 using System.Threading.Tasks;
 
-namespace BudgetHistory.Core.Extensions
+namespace BudgetHistory.Business.Extensions
 {
     public static class NoteExtensions
     {

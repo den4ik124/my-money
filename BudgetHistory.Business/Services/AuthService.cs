@@ -65,7 +65,7 @@ namespace BudgetHistory.Auth
                 : ServiceResponse<IList<string>>.Success(roles);
         }
 
-        public async Task<ServiceResponse> Authenticate(string userName, string password, HttpContext context)
+        public async Task<ServiceResponse<IdentityUser>> Authenticate(string userName, string password, HttpContext context)
         {
             try
             {
@@ -73,7 +73,7 @@ namespace BudgetHistory.Auth
 
                 if (userFromDB == null)
                 {
-                    return await Failed<AuthService>(_logger, string.Format(ResponseMessages.UserWithNameDoesNotExist, userName));
+                    return await Failed<AuthService, IdentityUser>(_logger, string.Format(ResponseMessages.UserWithNameDoesNotExist, userName));
                 }
 
                 var result = await _signInManager.CheckPasswordSignInAsync(userFromDB, password, false);
@@ -88,7 +88,7 @@ namespace BudgetHistory.Auth
                         SameSite = SameSiteMode.None,
                         Secure = true,
                     });
-                    return ServiceResponse.Success(string.Format(ResponseMessages.UserSuccessfullLogin, userName));
+                    return ServiceResponse<IdentityUser>.Success(userFromDB, string.Format(ResponseMessages.UserSuccessfullLogin, userName));
                 }
             }
             catch (Exception ex)
@@ -97,7 +97,7 @@ namespace BudgetHistory.Auth
                 await _logger.LogError(errorMessage);
             }
 
-            return await Failed<AuthService>(_logger, string.Format(ResponseMessages.UserLoginInvalidPassword, userName));
+            return await Failed<AuthService, IdentityUser>(_logger, string.Format(ResponseMessages.UserLoginInvalidPassword, userName));
         }
 
         public async Task<ServiceResponse> RegisterUser(IdentityUser identityUser, string password)

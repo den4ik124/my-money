@@ -31,14 +31,14 @@ namespace BudgetHistory.Application.Auth.Queries
                 //TODO Logging here
                 return Result<UserDataDto>.Failure(ResponseMessages.EmptyUserName);
             }
-            var result = await _authService.GetCurrentUser(request.UserName);
-            if (!result.IsSuccess)
+            var identityUserResult = await _authService.GetCurrentUser(request.UserName);
+            if (identityUserResult.IsSuccess is false)
             {
                 //TODO Logging here
-                return Result<UserDataDto>.Failure(result.Message);
+                return Result<UserDataDto>.Failure(identityUserResult.Message);
             }
 
-            var identityUser = result.Value;
+            var identityUser = identityUserResult.Value;
 
             var user = await _unitOfWork.GetGenericRepository<User>().GetFirst(u => u.AssociatedIdentityUserId.ToString() == identityUser.Id);
             var rolesResult = await _authService.GetUserRoles(identityUser);

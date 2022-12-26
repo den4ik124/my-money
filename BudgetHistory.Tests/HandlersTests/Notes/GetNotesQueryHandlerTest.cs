@@ -1,9 +1,9 @@
 using BudgetHistory.Abstractions.Services;
 using BudgetHistory.Application.DTOs.Common;
 using BudgetHistory.Application.Notes.Queries;
+using BudgetHistory.Business.Extensions;
 using BudgetHistory.Business.Services;
 using BudgetHistory.Core.Constants;
-using BudgetHistory.Core.Extensions;
 using Moq;
 using Shouldly;
 using System;

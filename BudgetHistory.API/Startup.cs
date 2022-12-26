@@ -58,6 +58,7 @@ namespace BudgetHistory.API
             app.UseHttpsRedirection();
 
             app.UseRouting();
+            app.UseCors("CorsPolicy");
 
             app.UseMiddleware<AuthTokenCheckerMiddleware>();
             app.UseMiddleware<RoomTokenCheckerMiddleware>();

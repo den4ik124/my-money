@@ -27,7 +27,6 @@ namespace BudgetHistory.Api.Controllers
             {
                 UserLoginDto = userDto,
                 HttpContext = base.HttpContext,
-                Response = base.Response
             }));
         }
 

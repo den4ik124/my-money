@@ -2,7 +2,6 @@
 using BudgetHistory.Abstractions.Services;
 using BudgetHistory.Application.Core;
 using BudgetHistory.Application.DTOs.Room;
-using BudgetHistory.Core.Extensions;
 using BudgetHistory.Core.Resources;
 using MediatR;
 using System.Threading;

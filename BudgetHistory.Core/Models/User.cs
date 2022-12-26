@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BudgetHistory.Core.Models
 {
@@ -9,5 +10,8 @@ namespace BudgetHistory.Core.Models
         public string Email { get; set; }
         public Guid AssociatedIdentityUserId { get; set; }
         public IEnumerable<Room> Rooms { get; set; }
+
+        [NotMapped]
+        public IEnumerable<string> Roles { get; set; }
     }
 }
