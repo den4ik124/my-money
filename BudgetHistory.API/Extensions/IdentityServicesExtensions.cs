@@ -98,6 +98,22 @@ namespace BudgetHistory.API.Extensions
                                         context.User.IsInRole(nameof(Roles.Guest))));
             });
 
+            services.AddCors(opt =>
+            {
+                opt.AddPolicy("CorsPolicy", policy =>
+                {
+                    var origins = new[]
+                    {
+                        "http://localhost:3000", //прописывают адрес UI
+                        //""
+                    };
+                    policy.AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials()
+                        .WithOrigins(origins);
+                });
+            });
+
             services.AddTransient<ISeedEmployees, SeedEmployees>();
             services.AddTransient<ITokenService, TokenService>();
             services.AddTransient<IAuthService, AuthService>();

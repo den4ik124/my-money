@@ -4,7 +4,7 @@
     {
         public T Value { get; set; }
 
-        public static ServiceResponse<T> Success(T value) => new() { IsSuccess = true, Value = value };
+        public static ServiceResponse<T> Success(T value, string message = "") => new() { IsSuccess = true, Value = value, Message = message };
 
         public new static ServiceResponse<T> Failure(string errorMessage) => new() { IsSuccess = false, Message = errorMessage, Value = default };
     }

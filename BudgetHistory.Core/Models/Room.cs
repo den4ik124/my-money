@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 
 namespace BudgetHistory.Core.Models
 {
@@ -16,5 +17,8 @@ namespace BudgetHistory.Core.Models
 
         public string EncryptedPassword { get; set; }
         public IEnumerable<Note> Notes { get; set; }
+
+        public bool IsUserAllowableToReadData(string userId)
+            => Users.Where(user => user.Id.ToString() == userId).Any();
     }
 }

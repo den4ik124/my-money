@@ -1,7 +1,7 @@
 ﻿using BudgetHistory.Abstractions.Interfaces;
 using BudgetHistory.Abstractions.Interfaces.Data;
 using BudgetHistory.Abstractions.Services;
-using BudgetHistory.Core.Extensions;
+using BudgetHistory.Business.Extensions;
 using BudgetHistory.Core.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

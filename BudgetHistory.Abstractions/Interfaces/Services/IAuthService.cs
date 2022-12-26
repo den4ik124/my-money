@@ -12,7 +12,7 @@ namespace BudgetHistory.Auth.Interfaces
 
         Task<ServiceResponse<IList<string>>> GetUserRoles(IdentityUser user);
 
-        Task<ServiceResponse> Authenticate(string userName, string password, HttpContext context);
+        Task<ServiceResponse<IdentityUser>> Authenticate(string userName, string password, HttpContext context);
 
         Task<ServiceResponse> RegisterUser(IdentityUser identityUser, string password);
     }
